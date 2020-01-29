@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "yxy",
+    "x x",
+    "yxy"
+  ],
+  "key": {
+    "x": {
+      "tag": "forge:ingots/iron"
+    },
+    "y": {
+      "tag": "forge:ingots/steel"
+    }
+  },
+  "result": {
+    "item": "allomancy:alloying_smelter"
+  }
+}

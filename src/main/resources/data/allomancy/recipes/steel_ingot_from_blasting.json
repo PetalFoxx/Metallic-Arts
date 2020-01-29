@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:blasting",
+  "ingredient": {
+    "tag": "forge:ingots/iron"
+  },
+  "result": "allomancy:steel_ingot",
+  "experience": 0.6,
+  "cookingtime": 100
+}

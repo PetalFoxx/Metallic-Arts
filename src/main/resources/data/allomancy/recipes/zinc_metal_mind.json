@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " x ",
+    "x x",
+    " x "
+  ],
+  "key": {
+    "x": {
+      "tag": "forge:ingots/zinc"
+    }
+  },
+  "result": {
+    "item": "allomancy:zinc_metal_mind"
+  }
+}

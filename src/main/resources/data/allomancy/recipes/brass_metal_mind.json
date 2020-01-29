@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " x ",
+    "x x",
+    " x "
+  ],
+  "key": {
+    "x": {
+      "tag": "forge:ingots/brass"
+    }
+  },
+  "result": {
+    "item": "allomancy:brass_metal_mind"
+  }
+}

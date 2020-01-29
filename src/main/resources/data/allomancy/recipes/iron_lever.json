@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "x",
+    "y"
+  ],
+  "key": {
+    "x": {
+      "item": "minecraft:stick"
+    },
+    "y": {
+      "tag": "forge:ingots/generic_metal"
+    }
+  },
+  "result": {
+    "item": "allomancy:iron_lever"
+  }
+}

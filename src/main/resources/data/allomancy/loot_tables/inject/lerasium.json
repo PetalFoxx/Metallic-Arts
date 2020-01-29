@@ -1,0 +1,58 @@
+{
+  "__comment": "This table is injected as its own pool into minecraft:chests/simple_dungeon",
+  "pools": [{
+    "name": "main",
+    "rolls": 1,
+    "entries": [
+      {
+        "type": "item",
+        "name": "allomancy:lerasium_nugget",
+        "weight": 0.01
+      },
+      {
+        "type": "item",
+        "name": "allomancy:bronze_lerasium_nugget",
+        "weight": 0.2
+      },
+      {
+        "type": "item",
+        "name": "allomancy:copper_lerasium_nugget",
+        "weight": 0.2
+      },
+      {
+        "type": "item",
+        "name": "allomancy:tin_lerasium_nugget",
+        "weight": 0.2
+      },
+      {
+        "type": "item",
+        "name": "allomancy:iron_lerasium_nugget",
+        "weight": 0.2
+      },
+      {
+        "type": "item",
+        "name": "allomancy:steel_lerasium_nugget",
+        "weight": 0.2
+      },
+      {
+        "type": "item",
+        "name": "allomancy:pewter_lerasium_nugget",
+        "weight": 0.2
+      },
+      {
+        "type": "item",
+        "name": "allomancy:zinc_lerasium_nugget",
+        "weight": 0.2
+      },
+      {
+        "type": "item",
+        "name": "allomancy:brass_lerasium_nugget",
+        "weight": 0.2
+      },
+      {
+        "type": "empty",
+        "weight": 99
+      }
+    ]
+  }]
+}

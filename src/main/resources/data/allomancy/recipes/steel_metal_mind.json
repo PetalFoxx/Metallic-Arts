@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " x ",
+    "x x",
+    " x "
+  ],
+  "key": {
+    "x": {
+      "tag": "forge:ingots/steel"
+    }
+  },
+  "result": {
+    "item": "allomancy:steel_metal_mind"
+  }
+}

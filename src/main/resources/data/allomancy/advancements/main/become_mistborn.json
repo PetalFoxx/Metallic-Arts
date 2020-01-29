@@ -1,0 +1,27 @@
+{
+    "display": {
+        "icon": {
+            "item": "allomancy:mistcloak"
+        },
+        "title": {
+            "translate": "advancements.become_mistborn.title"
+        },
+        "description": {
+            "translate": "advancements.become_mistborn.desc"
+        }
+    },
+    "parent": "minecraft:adventure/root",
+    "rewards": {
+        "experience": 100
+    },
+    "criteria": {
+        "lerasium_nugget": {
+            "trigger": "consume_item",
+            "conditions": {
+                "item": {
+                    "item": "allomancy:lerasium_nugget"
+                }
+            }
+        }
+    }
+}

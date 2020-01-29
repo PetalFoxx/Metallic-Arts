@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " x ",
+    "y y",
+    " x "
+  ],
+  "key": {
+    "x": {
+      "tag": "forge:ingots/iron"
+    },
+    "y": {
+      "tag": "forge:ingots/gold"
+    }
+  },
+  "result": {
+    "item": "allomancy:metal_purifier"
+  }
+}

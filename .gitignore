@@ -1,0 +1,12 @@
+/bin
+/.gradle
+/.settings
+/build
+.classpath
+.project
+/run
+*.launch
+/.idea
+/doc
+/out
+TODO.txt

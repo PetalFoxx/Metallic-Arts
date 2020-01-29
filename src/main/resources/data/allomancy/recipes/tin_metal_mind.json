@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " x ",
+    "x x",
+    " x "
+  ],
+  "key": {
+    "x": {
+      "tag": "forge:ingots/tin"
+    }
+  },
+  "result": {
+    "item": "allomancy:tin_metal_mind"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    "allomancy:brass_nugget",
+    "allomancy:bronze_nugget",
+    "allomancy:copper_nugget",
+    "allomancy:lead_nugget",
+    "allomancy:pewter_nugget",
+    "allomancy:steel_nugget",
+    "allomancy:tin_nugget",
+    "allomancy:zinc_nugget"
+  ]
+}
