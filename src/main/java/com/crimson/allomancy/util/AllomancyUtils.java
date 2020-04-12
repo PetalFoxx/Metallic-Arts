@@ -19,12 +19,16 @@ import net.minecraft.entity.item.ItemFrameEntity;
 import net.minecraft.entity.item.minecart.AbstractMinecartEntity;
 import net.minecraft.entity.merchant.villager.AbstractVillagerEntity;
 import net.minecraft.entity.monster.*;
+import net.minecraft.entity.passive.ChickenEntity;
 import net.minecraft.entity.passive.CowEntity;
 import net.minecraft.entity.passive.IronGolemEntity;
 import net.minecraft.entity.passive.PigEntity;
+import net.minecraft.entity.passive.PolarBearEntity;
 import net.minecraft.entity.passive.RabbitEntity;
 import net.minecraft.entity.passive.SheepEntity;
 import net.minecraft.entity.passive.WolfEntity;
+import net.minecraft.entity.passive.horse.HorseEntity;
+import net.minecraft.entity.passive.horse.LlamaEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.entity.projectile.ArrowEntity;
 import net.minecraft.item.ItemStack;
@@ -213,6 +217,36 @@ public class AllomancyUtils {
     		if(AllomancyConfig.MOB.RABBIT.getStrength(interaction) <= strength)
     			return true;
     	}
+    	if (ent instanceof ChickenEntity)
+    	{
+    		if(AllomancyConfig.MOB.CHICKEN.getStrength(interaction) <= strength)
+    			return true;
+    	}
+    	if (ent instanceof SheepEntity)
+    	{
+    		if(AllomancyConfig.MOB.SHEEP.getStrength(interaction) <= strength)
+    			return true;
+    	}
+    	if (ent instanceof HorseEntity)
+    	{
+    		if(AllomancyConfig.MOB.HORSE.getStrength(interaction) <= strength)
+    			return true;
+    	}
+    	if (ent instanceof PolarBearEntity)
+    	{
+    		if(AllomancyConfig.MOB.POLARBEAR.getStrength(interaction) <= strength)
+    			return true;
+    	}
+    	if (ent instanceof LlamaEntity)
+    	{
+    		if(AllomancyConfig.MOB.HORSE.getStrength(interaction) <= strength)
+    			return true;
+    	}
+    	if (ent instanceof WolfEntity)
+    	{
+    		if(AllomancyConfig.MOB.WOLF.getStrength(interaction) <= strength)
+    			return true;
+    	}
     	
     	
     	if (strength > 70)
@@ -281,12 +315,12 @@ public class AllomancyUtils {
                     if(capability.getMetalFlaring(i))
                     {
                     	capability.setBurnTime(i, capability.getBurnTime(i) - 2);
-                    	if(Math.random() == 1.0)
+                    	if(Math.random() == 0.0)
                     		capability.setSavant(i, capability.getSavant(i) + 2);
                     } else
                     {
                     	capability.setBurnTime(i, capability.getBurnTime(i) - 1);
-                    	if(Math.random() == 1.0)
+                    	if(Math.random() == 0.0)
                     		capability.setSavant(i, capability.getSavant(i) + 1);
                     }
                     if (capability.getBurnTime(i) == 0) {

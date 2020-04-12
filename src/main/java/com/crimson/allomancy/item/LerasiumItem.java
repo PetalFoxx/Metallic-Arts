@@ -2,6 +2,7 @@ package com.crimson.allomancy.item;
 
 import com.crimson.allomancy.Allomancy;
 import com.crimson.allomancy.util.AllomancyCapability;
+import com.crimson.allomancy.util.Metal;
 import com.crimson.allomancy.util.Registry;
 
 import net.minecraft.client.util.ITooltipFlag;
@@ -50,11 +51,12 @@ public class LerasiumItem extends Item {
         double x = livingEntity.posX;
         double y = livingEntity.posY + 3;
         double z = livingEntity.posZ;
-        for(int i = 0; i < 8; i++)
+        for(int i = 0; i < Metal.getMetals(); i++)
         {
         	cap.setCanBurn(i, true);
-        	cap.setBurnStrength(i, cap.getBurnStrength(i) + 5);
-        	cap.setCanStore(i, true);
+        	cap.setBurnStrength(i, cap.getTrueBurnStrength(i) + 5);
+        	//cap.setCanStore(i, true);
+        	cap.setMetalAmounts(i, 10);
         }
         cap.setIsAllomancer(true);
         //Fancy shmancy effects

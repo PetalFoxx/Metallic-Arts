@@ -2,7 +2,6 @@ package com.crimson.allomancy.util;
 
 import com.crimson.allomancy.Allomancy;
 import com.crimson.allomancy.ModBlocks;
-import com.crimson.allomancy.ModTileEntityTypes;
 import com.crimson.allomancy.block.AlloyingSmelter;
 import com.crimson.allomancy.block.IronButtonBlock;
 import com.crimson.allomancy.block.IronLeverBlock;
@@ -20,18 +19,17 @@ import com.crimson.allomancy.item.metalmind.SteelMetalMind;
 import com.crimson.allomancy.item.metalmind.TinMetalMind;
 import com.crimson.allomancy.item.metalmind.ZincMetalMind;
 import com.crimson.allomancy.item.recipe.VialItemRecipe;
+import com.crimson.allomancy.mobs.AllomanticZombie;
 import com.crimson.allomancy.network.packets.*;
 import com.crimson.allomancy.tileentity.AlloyingSmelterTileEntity;
 import com.crimson.allomancy.tileentity.MetalPurifierTileEntity;
 import com.google.common.base.Preconditions;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.ContainerBlock;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.SpriteRenderer;
 import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityClassification;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.projectile.ProjectileItemEntity;
@@ -56,8 +54,6 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.registry.GameRegistry;
-import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.network.NetworkRegistry;
 import net.minecraftforge.fml.network.simple.SimpleChannel;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -149,10 +145,22 @@ public class Registry {
     @OnlyIn(Dist.CLIENT)
     public static KeyBinding mind;
     
+    @OnlyIn(Dist.CLIENT)
+    public static KeyBinding activeIron;
+    
+    @OnlyIn(Dist.CLIENT)
+    public static KeyBinding activeSteel;
+    
+    @OnlyIn(Dist.CLIENT)
+    public static KeyBinding activeZinc;
+    
+    @OnlyIn(Dist.CLIENT)
+    public static KeyBinding activeBrass;
     
     
     
-    public static final Potion STORE_IRON = null;
+    
+    /*public static final Potion STORE_IRON = null;
     public static final Potion TAP_IRON = null;
     public static final Potion STORE_STEEL = null;
     public static final Potion TAP_STEEL = null;
@@ -167,10 +175,14 @@ public class Registry {
     public static final Potion STORE_ZINC = null;
     public static final Potion TAP_ZINC = null;
     public static final Potion STORE_BRASS = null;
-    public static final Potion TAP_BRASS = null; //MobEffects.HASTE;
+    public static final Potion TAP_BRASS = null; //MobEffects.HASTE;*/
     
     
+    //@ObjectHolder("allomancy:allomantic_zombie")
+    //public static EntityType<AllomanticZombie> allomantic_zombie = null;
     
+    //@ObjectHolder("allomancy:spawn_allomantic_zombie")
+    //public static final Item spawn_allomantic_zombie = null;
     
     
     
@@ -186,8 +198,8 @@ public class Registry {
     public static final String[] metals = {"iron", "steel", "tin", "pewter", "zinc", "brass", "copper", "bronze", "lead"};
     
 
-    @SubscribeEvent
-    public static void registerPotions(RegistryEvent.Register<Potion> event) {
+    //@SubscribeEvent
+    /*public static void registerPotions(RegistryEvent.Register<Potion> event) {
         event.getRegistry().registerAll(
                 new Potion("Store Iron", new EffectInstance(Effects.LUCK, 0, 0, false, false)).setRegistryName("store_iron"),
                 new Potion("Tap Iron").setRegistryName("tap_iron"),
@@ -206,17 +218,26 @@ public class Registry {
                 new Potion("Store Brass").setRegistryName("store_brass"),
                 new Potion("Tap Brass").setRegistryName("tap_brass")
         );
-    }
+    }*/
 
     
     
     
     
-    public static final SimpleChannel NETWORK = NetworkRegistry.ChannelBuilder.named(new ResourceLocation(Allomancy.MODID, "networking"))
-            .clientAcceptedVersions(s -> true)
-            .serverAcceptedVersions(s -> true)
-            .networkProtocolVersion(() -> "1.0.0")
-            .simpleChannel();
+    //public static final SimpleChannel NETWORK = NetworkRegistry.ChannelBuilder.named(new ResourceLocation(Allomancy.MODID, "networking"))
+    //        .clientAcceptedVersions(s -> true)
+    //       .serverAcceptedVersions(s -> true)
+    //        .networkProtocolVersion(() -> "1.0.0")
+    //        .simpleChannel();
+    
+    private static final String PROTOCOL_VERSION = "1";
+    public static final SimpleChannel NETWORK = NetworkRegistry.newSimpleChannel(
+        new ResourceLocation(Allomancy.MODID, "networking"),
+        () -> PROTOCOL_VERSION,
+        PROTOCOL_VERSION::equals,
+        PROTOCOL_VERSION::equals
+    );
+   
 
     public static ItemGroup allomancy_group = new ItemGroup(Allomancy.MODID) {
         @Override
@@ -279,6 +300,18 @@ public class Registry {
         
         mind = new KeyBinding("key.mind", GLFW.GLFW_KEY_Z, "key.categories.allomancy");
         ClientRegistry.registerKeyBinding(mind);
+        
+        activeIron = new KeyBinding("key.activeIron", GLFW.GLFW_KEY_X, "key.categories.allomancy");
+        ClientRegistry.registerKeyBinding(activeIron);
+        
+        activeSteel = new KeyBinding("key.activeSteel", GLFW.GLFW_KEY_X, "key.categories.allomancy");
+        ClientRegistry.registerKeyBinding(activeSteel);
+        
+        activeBrass = new KeyBinding("key.activeBrass", GLFW.GLFW_KEY_X, "key.categories.allomancy");
+        ClientRegistry.registerKeyBinding(activeBrass);
+        
+        activeZinc = new KeyBinding("key.activeZinc", GLFW.GLFW_KEY_X, "key.categories.allomancy");
+        ClientRegistry.registerKeyBinding(activeZinc);
     }
 
     public static void registerPackets() {
@@ -289,7 +322,6 @@ public class Registry {
         NETWORK.registerMessage(index++, ChangeEmotionPacket.class, ChangeEmotionPacket::encode, ChangeEmotionPacket::decode, ChangeEmotionPacket::handle);
         NETWORK.registerMessage(index++, TryPushPullEntity.class, TryPushPullEntity::encode, TryPushPullEntity::decode, TryPushPullEntity::handle);
         NETWORK.registerMessage(index, TryPushPullBlock.class, TryPushPullBlock::encode, TryPushPullBlock::decode, TryPushPullBlock::handle);
-
     }
 
 
@@ -338,7 +370,7 @@ public class Registry {
         }
         
      // Register lerasium alloys
-        for (int i = 0; i < allomanctic_metals.length; i++) {
+        for (int i = 0; i < Metal.getMetals(); i++) {
             event.getRegistry().register(
                     new LerasiumAlloy(i));
            
@@ -422,14 +454,39 @@ public class Registry {
                 .setUpdateInterval(20).setCustomClientFactory((spawnEntity, world) -> new GoldNuggetEntity(gold_nugget, world)).size(0.25F, 0.25F).build("gold_nugget")
                 .setRegistryName(Allomancy.MODID, "gold_nugget"));
         
-        
         for (int i = 0; i < metals.length; i++) {
         	final int test = i;
 	        event.getRegistry().register(EntityType.Builder.<NuggetEntity>create(NuggetEntity::new, EntityClassification.MISC).setShouldReceiveVelocityUpdates(true)
 	                .setUpdateInterval(20).setCustomClientFactory((spawnEntity, world) -> new NuggetEntity(getNuggetEntities()[test], world)).size(0.25F, 0.25F).build(getNuggetItems()[i].getRegistryName().toString())
 	                .setRegistryName(getNuggetItems()[i].getRegistryName().toString()));
         }
+        
+        //event.getRegistry().register(allomantic_zombie);
     }
+    
+   /* @SubscribeEvent
+    public static void registerSpawnEggs(final RegistryEvent.Register<Item> event) {
+    	genEntity();
+        event.getRegistry().registerAll(
+                new SpawnEggItem(allomantic_zombie, 0, 0,
+                        new Item.Properties().group(ItemGroup.MISC)
+                ).setRegistryName(Allomancy.MODID, "spawn_allomantic_zombie")
+        );
+    }
+    
+    private static void genEntity() {
+    	allomantic_zombie = (EntityType<AllomanticZombie>) EntityType.Builder
+                .<AllomanticZombie>create(AllomanticZombie::new, EntityClassification.MONSTER)
+                .size(2F, 1F)
+                .build("allomantic_zombie").setRegistryName(Allomancy.MODID, "allomantic_zombie");
+    }
+    
+    @SubscribeEvent
+    public static void registerEntities(final RegistryEvent.Register<EntityType<?>> event) {
+        event.getRegistry().registerAll(
+        		allomantic_zombie
+        );
+    }*/
     
 
     @SubscribeEvent

@@ -52,7 +52,7 @@ public class SteelMetalMind extends MetalMindItem {
 	void tappingAction(ItemStack item, World worldIn) {
 		if(canLose(item))
 		{
-			worldIn.getPlayerByUuid(item.getTag().getUniqueId("owner")).addPotionEffect(Registry.STORE_IRON.getEffects().get(0));
+			//worldIn.getPlayerByUuid(item.getTag().getUniqueId("owner")).addPotionEffect(Registry.STORE_IRON.getEffects().get(0));
 			worldIn.getPlayerByUuid(item.getTag().getUniqueId("owner")).addPotionEffect(new EffectInstance(Effects.SPEED, 10, 0 + item.getTag().getInt("strength"), true, false));
 			if(item.getTag().getInt("strength") >= 1)
 				worldIn.getPlayerByUuid(item.getTag().getUniqueId("owner")).addPotionEffect(new EffectInstance(Effects.JUMP_BOOST, 10, (0 + item.getTag().getInt("strength")) / 2, true, false));

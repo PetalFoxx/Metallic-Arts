@@ -13,7 +13,7 @@ import java.util.function.Supplier;
 
 public class UpdateBurnPacket {
 
-    private byte mat;
+    private int mat;
     private boolean value;
 
     /**
@@ -22,18 +22,18 @@ public class UpdateBurnPacket {
      * @param mat   the index of the metal
      * @param value whether or not it is burning
      */
-    public UpdateBurnPacket(byte mat, boolean value) {
+    public UpdateBurnPacket(int mat, boolean value) {
         this.mat = mat;
         this.value = value; // Convert bool to int
     }
 
     public static void encode(UpdateBurnPacket pkt, PacketBuffer buf) {
-        buf.writeByte(pkt.mat);
+        buf.writeInt(pkt.mat);
         buf.writeBoolean(pkt.value);
     }
 
     public static UpdateBurnPacket decode(PacketBuffer buf) {
-        return new UpdateBurnPacket(buf.readByte(), buf.readBoolean());
+        return new UpdateBurnPacket(buf.readInt(), buf.readBoolean());
     }
 
 
@@ -50,8 +50,8 @@ public class UpdateBurnPacket {
             }
 
             NetworkHelper.sendTo(new AllomancyCapabilityPacket(cap, player.getEntityId()), PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> player));
-
-
         });
+        
+        ctx.get().setPacketHandled(true);
     }
 }

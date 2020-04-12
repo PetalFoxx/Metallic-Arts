@@ -2,9 +2,9 @@ package com.crimson.allomancy;
 
 import com.crimson.allomancy.command.AllomancyPowerCommand;
 import com.crimson.allomancy.command.AllomancyPowerType;
+import com.crimson.allomancy.command.FeruchemyPowerType;
 import com.crimson.allomancy.handlers.ClientEventHandler;
 import com.crimson.allomancy.handlers.CommonEventHandler;
-import com.crimson.allomancy.tileentity.MetalPurifierTileEntity;
 import com.crimson.allomancy.util.AllomancyCapability;
 import com.crimson.allomancy.util.AllomancyConfig;
 import com.crimson.allomancy.util.Registry;
@@ -51,12 +51,13 @@ public class Allomancy {
     }
 
     public void serverInit(final FMLServerStartingEvent e) {
-        //AllomancyPowerCommand.register(e.getCommandDispatcher());
+        AllomancyPowerCommand.register(e.getCommandDispatcher());
     }
 
     public void init(final FMLCommonSetupEvent e) {
         //Register our ArgumentType so it can be sent over network
         ArgumentTypes.register("allomancy_power", AllomancyPowerType.class, new ArgumentSerializer<>(AllomancyPowerType::powerType));
+        ArgumentTypes.register("feruchemy_power", FeruchemyPowerType.class, new ArgumentSerializer<>(FeruchemyPowerType::powerType));
         OreGenerator.generationSetup();
         AllomancyCapability.register();
         MinecraftForge.EVENT_BUS.register(new CommonEventHandler());

@@ -2,6 +2,7 @@ package com.crimson.allomancy.mobs;
 
 import com.crimson.allomancy.util.AllomancyCapability;
 
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ai.goal.HurtByTargetGoal;
 import net.minecraft.entity.ai.goal.MoveThroughVillageGoal;
 import net.minecraft.entity.ai.goal.NearestAttackableTargetGoal;
@@ -13,10 +14,24 @@ import net.minecraft.entity.monster.ZombiePigmanEntity;
 import net.minecraft.entity.passive.IronGolemEntity;
 import net.minecraft.entity.passive.TurtleEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.network.IPacket;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.network.NetworkHooks;
 
 public class AllomanticZombie extends ZombieEntity {
 
+	
+	public AllomanticZombie(EntityType<? extends AllomanticZombie> type, World worldIn) {
+	      super(type, worldIn);
+	      AllomancyCapability.forPlayer(this).canBurn(AllomancyCapability.PEWTER);
+			AllomancyCapability.forPlayer(this).isAllomancer();
+			AllomancyCapability.forPlayer(this).setBurnStrength(AllomancyCapability.PEWTER, 15);
+			AllomancyCapability.forPlayer(this).setMetalAmounts(AllomancyCapability.PEWTER, 10);
+			
+			AllomancyCapability.forPlayer(this).setMetalBurning(AllomancyCapability.PEWTER, true);
+	   }
+	
+	
 	public AllomanticZombie(World worldIn) {
 		super(worldIn);
 		// TODO Auto-generated constructor stub
@@ -24,6 +39,8 @@ public class AllomanticZombie extends ZombieEntity {
 		AllomancyCapability.forPlayer(this).isAllomancer();
 		AllomancyCapability.forPlayer(this).setBurnStrength(AllomancyCapability.PEWTER, 15);
 		AllomancyCapability.forPlayer(this).setMetalAmounts(AllomancyCapability.PEWTER, 10);
+		
+		AllomancyCapability.forPlayer(this).setMetalBurning(AllomancyCapability.PEWTER, true);
 	}
 	
 	@Override
@@ -38,4 +55,8 @@ public class AllomanticZombie extends ZombieEntity {
 	      this.targetSelector.addGoal(5, new NearestAttackableTargetGoal<>(this, TurtleEntity.class, 10, true, false, TurtleEntity.TARGET_DRY_BABY));
 	   }
 
+	@Override
+    public IPacket<?> createSpawnPacket() {
+        return NetworkHooks.getEntitySpawningPacket(this);
+    }
 }

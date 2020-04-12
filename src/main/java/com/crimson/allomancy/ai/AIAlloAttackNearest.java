@@ -24,7 +24,7 @@ public class AIAlloAttackNearest extends NearestAttackableTargetGoal {
 	@Override
 	protected AxisAlignedBB getTargetableArea(double targetDistance) {
 		if(cap.getMetalBurning(AllomancyCapability.TIN))
-			return this.goalOwner.getBoundingBox().grow(targetDistance + cap.getBurnStrength(AllomancyCapability.TIN) / 10, 4.0D, targetDistance + cap.getBurnStrength(AllomancyCapability.TIN));
+			return this.goalOwner.getBoundingBox().grow(targetDistance + cap.getCalcBurnStrength(AllomancyCapability.TIN) / 10, 4.0D, targetDistance + cap.getCalcBurnStrength(AllomancyCapability.TIN));
 		
 		
 		

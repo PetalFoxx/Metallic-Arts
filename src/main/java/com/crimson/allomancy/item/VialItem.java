@@ -2,6 +2,7 @@ package com.crimson.allomancy.item;
 
 import com.crimson.allomancy.Allomancy;
 import com.crimson.allomancy.util.AllomancyCapability;
+import com.crimson.allomancy.util.Metal;
 import com.crimson.allomancy.util.Registry;
 
 import net.minecraft.client.util.ITooltipFlag;
@@ -38,8 +39,8 @@ public class VialItem extends Item {
             return stack;
         }
 
-        for (int i = 0; i < Registry.allomanctic_metals.length; i++) {
-            if (stack.getTag().contains(Registry.allomanctic_metals[i]) && stack.getTag().getBoolean(Registry.allomanctic_metals[i])) {
+        for (int i = 0; i < Metal.getMetals(); i++) {
+            if (stack.getTag().contains(Metal.getMetal(i).getName()) && stack.getTag().getBoolean(Metal.getMetal(i).getName())) {
                 if (cap.getMetalAmounts(i) < 10) {
                     cap.setMetalAmounts(i, 10);
                 }
@@ -73,8 +74,8 @@ public class VialItem extends Item {
         int filling = 0, full = 0;
         ItemStack itemStackIn = playerIn.getHeldItem(hand);
         if (itemStackIn.hasTag()) {
-            for (int i = 0; i < Registry.allomanctic_metals.length; i++) {
-                if (itemStackIn.getTag().contains(Registry.allomanctic_metals[i]) && itemStackIn.getTag().getBoolean(Registry.allomanctic_metals[i])) {
+            for (int i = 0; i < Metal.getMetals(); i++) {
+                if (itemStackIn.getTag().contains(Metal.getMetal(i).getName()) && itemStackIn.getTag().getBoolean(Metal.getMetal(i).getName())) {
                     filling++;
                     if (cap.getMetalAmounts(i) >= 10) {
                         full++;
@@ -97,9 +98,9 @@ public class VialItem extends Item {
     public void addInformation(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
         super.addInformation(stack, worldIn, tooltip, flagIn);
         if (stack.hasTag()) {
-            for (int i = 0; i < Registry.allomanctic_metals.length; i++) {
-                if (stack.getTag().getBoolean(Registry.allomanctic_metals[i])) {
-                    ITextComponent metal = new TranslationTextComponent("metals." + Registry.allomanctic_metals[i]);
+            for (int i = 0; i < Metal.getMetals(); i++) {
+                if (stack.getTag().getBoolean(Metal.getMetal(i).getName())) {
+                    ITextComponent metal = new TranslationTextComponent("metals." + Metal.getMetal(i));
                     metal.setStyle(metal.getStyle().setColor(TextFormatting.GRAY));
                     tooltip.add(metal);
                 }
@@ -121,8 +122,8 @@ public class VialItem extends Item {
 
             ItemStack resultItem = new ItemStack(Registry.vial, 1);
             CompoundNBT nbt = new CompoundNBT();
-            for (int i = 0; i < Registry.allomanctic_metals.length; i++) {
-                nbt.putBoolean(Registry.allomanctic_metals[i], true);
+            for (int i = 0; i < Metal.getMetals(); i++) {
+                nbt.putBoolean(Metal.getMetal(i).getName(), true);
             }
             resultItem.setTag(nbt);
             items.add(resultItem);

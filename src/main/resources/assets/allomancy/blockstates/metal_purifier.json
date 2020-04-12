@@ -1,5 +1,20 @@
 {
-    "variants": {
-        "": { "model": "allomancy:block/copper_ore" }
+  "variants": 
+  	{
+	    "facing=north": {
+	      "model": "allomancy:block/metal_purifier"
+	    },
+	    "facing=south": {
+	      "model": "allomancy:block/metal_purifier",
+	      "y": 180
+	    },
+	    "facing=west": {
+	      "model": "allomancy:block/metal_purifier",
+	      "y": 270
+	    },
+	    "facing=east": {
+	      "model": "allomancy:block/metal_purifier",
+	      "y": 90
+	    }
     }
 }

@@ -22,7 +22,10 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.boss.WitherEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.potion.EffectInstance;
+import net.minecraft.potion.Effects;
 import net.minecraft.entity.monster.CreeperEntity;
+import net.minecraft.entity.monster.MonsterEntity;
 import net.minecraft.entity.monster.SkeletonEntity;
 import net.minecraft.entity.monster.WitherSkeletonEntity;
 import net.minecraft.util.ActionResultType;
@@ -97,16 +100,16 @@ public class ClientEventHandler {
                 int power = 10;
                 if(cap.getMetalBurning(AllomancyCapability.IRON) && cap.getMetalBurning(AllomancyCapability.STEEL))
                 {
-                	if(cap.getBurnStrength(AllomancyCapability.IRON) > cap.getBurnStrength(AllomancyCapability.STEEL))
+                	if(cap.getCalcBurnStrength(AllomancyCapability.IRON) > cap.getCalcBurnStrength(AllomancyCapability.STEEL))
                 	{
-                		power = (int) cap.getBurnStrength(AllomancyCapability.IRON);
+                		power = (int) cap.getCalcBurnStrength(AllomancyCapability.IRON);
                 	} else {
-                		power = (int) cap.getBurnStrength(AllomancyCapability.STEEL);
+                		power = (int) cap.getCalcBurnStrength(AllomancyCapability.STEEL);
                 	}
                 } else if (cap.getMetalBurning(AllomancyCapability.IRON)) {
-                	power = (int) cap.getBurnStrength(AllomancyCapability.IRON);
+                	power = (int) cap.getCalcBurnStrength(AllomancyCapability.IRON);
                 } else {
-                	power = (int) cap.getBurnStrength(AllomancyCapability.STEEL);
+                	power = (int) cap.getCalcBurnStrength(AllomancyCapability.STEEL);
                 }
                 
                 
@@ -143,10 +146,11 @@ public class ClientEventHandler {
             	if (cap.getMetalBurning(AllomancyCapability.COPPER))
 	            {
 	            	
-	            	float strength = cap.getBurnStrength(AllomancyCapability.COPPER);
+	            	float strength = cap.getCalcBurnStrength(AllomancyCapability.COPPER);
 	            	int xLoc = (int) player.posX, yLoc = (int) player.posY, zLoc = (int) player.posZ;
-	                BlockPos negative = new BlockPos(xLoc - strength * 2, yLoc - strength, zLoc - strength * 2);
-	                BlockPos positive = new BlockPos(xLoc + strength * 2, yLoc + strength, zLoc + strength * 2);
+
+	                BlockPos negative = new BlockPos(xLoc - 20, yLoc - 10, zLoc - 20);
+	                BlockPos positive = new BlockPos(xLoc + 20, yLoc + 10, zLoc + 20);
 	                
 	                List<LivingEntity> nearby;
 	                nearby = player.world.getEntitiesWithinAABB(LivingEntity.class, new AxisAlignedBB(negative, positive), entity -> entity != null);
@@ -154,22 +158,20 @@ public class ClientEventHandler {
 	                for(LivingEntity entity : nearby)
 	                {
 	                	if(AllomancyCapability.forPlayer(entity) != null)
-	                		AllomancyCapability.forPlayer(entity).setIsInCoppercloud(cap.getBurnStrength(AllomancyCapability.COPPER) + 5);
+	                		AllomancyCapability.forPlayer(entity).setIsInCoppercloud(cap.getCalcBurnStrength(AllomancyCapability.COPPER) + 5);
 
-	                	if(entity instanceof CreeperEntity || entity instanceof SkeletonEntity || entity instanceof WitherSkeletonEntity || entity instanceof WitherEntity) {
-	                		if(entity.getDistance(player) > (40 / strength))
+	                	if(entity instanceof MonsterEntity) {//CreeperEntity || entity instanceof SkeletonEntity || entity instanceof WitherSkeletonEntity || entity instanceof WitherEntity) {
+	                		if(entity.getDistance(player) > (80 / strength) && entity.getDistance(player) < 15)
 	                    	{
-	                    		NetworkHelper.sendToServer(new ChangeEmotionPacket(entity.getEntityId(), ChangeEmotionPacket.emotion.IGNORE, cap.getBurnStrength(AllomancyCapability.COPPER)));
+	                    		NetworkHelper.sendToServer(new ChangeEmotionPacket(entity.getEntityId(), ChangeEmotionPacket.emotion.IGNORE, cap.getCalcBurnStrength(AllomancyCapability.COPPER)));
 	                    	}
 	                	}
 	                }
 	            }
             	
-
-            	
             	if (cap.getMetalBurning(AllomancyCapability.IRON) && activateMarks) {
             		for(BlockPos mark : cap.getMarkedLocations()) {
-	                	int strength = (int) cap.getBurnStrength(AllomancyCapability.IRON);
+	                	int strength = (int) cap.getCalcBurnStrength(AllomancyCapability.IRON);
 	                	
 	                	BlockPos tarBlock = null;
 
@@ -185,16 +187,14 @@ public class ClientEventHandler {
 	                        if (tarBlock != null) {
 	                            //BlockPos bp = ((BlockRayTraceResult) trace).getPos();
 	                            
-	                            NetworkHelper.sendToServer(new TryPushPullBlock(tarBlock, AllomancyUtils.PULL, cap.getBurnStrength(AllomancyCapability.IRON)));
-	                            
+	                            NetworkHelper.sendToServer(new TryPushPullBlock(tarBlock, AllomancyUtils.PULL, cap.getCalcBurnStrength(AllomancyCapability.IRON)));
 	                        }
-	                    
 	                }
             	}
             	
             	if (cap.getMetalBurning(AllomancyCapability.STEEL) && activateMarks) {
             		for(BlockPos mark : cap.getMarkedLocations()) {
-	                	int strength = (int) cap.getBurnStrength(AllomancyCapability.STEEL);
+	                	int strength = (int) cap.getCalcBurnStrength(AllomancyCapability.STEEL);
 	                	
 	                	BlockPos tarBlock = null;
 
@@ -210,7 +210,7 @@ public class ClientEventHandler {
 	                        if (tarBlock != null) {
 	                            //BlockPos bp = ((BlockRayTraceResult) trace).getPos();
 	                            
-	                            NetworkHelper.sendToServer(new TryPushPullBlock(tarBlock, AllomancyUtils.PUSH, cap.getBurnStrength(AllomancyCapability.STEEL)));
+	                            NetworkHelper.sendToServer(new TryPushPullBlock(tarBlock, AllomancyUtils.PUSH, cap.getCalcBurnStrength(AllomancyCapability.STEEL)));
 	                            
 	                        }
 	                    
@@ -222,167 +222,39 @@ public class ClientEventHandler {
 
             	
                 // Handle our input-based powers
-                if (this.mc.gameSettings.keyBindAttack.isKeyDown() && (player.isSneaking() || player.isOnePlayerRiding())) {
-                    // Ray trace 30 blocks
-                	
-                    // All iron pulling powers
-                    if (cap.getMetalBurning(AllomancyCapability.IRON)) {
-                    	int strength = (int) cap.getBurnStrength(AllomancyCapability.IRON);
-                    	
-                    	BlockPos foundPos = null;
-                    	double dist = 10000f;
-                    	
-                    	RayTraceResult pos = ClientUtils.getMouseOverExtended(100);
-                    	Entity tarEnt = null;
-                    	BlockPos tarBlock = null;
-                    	
-                    	if(pos != null) {
-	                    	if(pos.getType() == RayTraceResult.Type.ENTITY )
-	                    	{
-	                    		foundPos = ((EntityRayTraceResult) pos).getEntity().getPosition();
-	                    	} else if (pos.getType() == RayTraceResult.Type.BLOCK) {
-	                    		foundPos = ((BlockRayTraceResult) pos).getPos();
-	                    	}
-                    	
-                    	
-                    	
-	                    	if(foundPos != null) {
-		                    	for(Entity entity : metal_entities) {
-		                    		if(entity.getPosition().distanceSq(foundPos) < dist)
-		                    		{
-		                    			tarEnt = entity;
-		                    			dist = entity.getPosition().distanceSq(foundPos);
-		                    		}
-		                    	}
-		                    	
-		                    	for(BlockPos block : metal_blocks) {
-		                    		if(block.distanceSq(foundPos) < dist)
-		                    		{
-		                    			tarBlock = block;
-		                    			dist = block.distanceSq(foundPos);
-		                    		}
-		                    	}
-	                    	}
-                    	}
-                    	
-
-                        //RayTraceResult trace = ClientUtils.getMouseOverExtended(5 + (strength / 2));
-
-                            if (tarEnt != null) {
-                                NetworkHelper.sendToServer(new TryPushPullEntity(tarEnt.getEntityId(), AllomancyUtils.PULL, cap.getBurnStrength(AllomancyCapability.IRON)));
-                            } else if (tarBlock != null) {
-                                //BlockPos bp = ((BlockRayTraceResult) trace).getPos();
-                                if (AllomancyUtils.isBlockMetal(this.mc.world.getBlockState(tarBlock).getBlock()) || (player.getHeldItemMainhand().getItem() == Registry.coin_bag && player.isSneaking())) {
-                                    NetworkHelper.sendToServer(new TryPushPullBlock(tarBlock, AllomancyUtils.PULL, cap.getBurnStrength(AllomancyCapability.IRON)));
-                                }
-                            }
-                        
-                    }
-                    
-                    
-                    
-                    
-                    
-                    // All zinc powers
-                    if (cap.getMetalBurning(AllomancyCapability.ZINC) && (player.isSneaking() || player.isOnePlayerRiding())) {
-                    	int strength = (int) cap.getBurnStrength(AllomancyCapability.ZINC);
-                        RayTraceResult trace = ClientUtils.getMouseOverExtended(5 + (strength / 2));
-                        Entity entity;
-                        if ((trace != null) && (trace.getType() == RayTraceResult.Type.ENTITY)) {
-                            entity = ((EntityRayTraceResult) trace).getEntity();
-                            if (entity instanceof CreatureEntity) {
-                                NetworkHelper.sendToServer(new ChangeEmotionPacket(entity.getEntityId(), ChangeEmotionPacket.emotion.AGGRO, cap.getBurnStrength(AllomancyCapability.ZINC)));
-                            }
-                        }
-                    }
-                }
-                
-                
-                
-                
-                
-                
-                
-                if (this.mc.gameSettings.keyBindUseItem.isKeyDown()) {
-                	
-                    // All steel pushing powers
-                    if (cap.getMetalBurning(AllomancyCapability.STEEL) && (player.isSneaking() || player.isOnePlayerRiding())) {
-//                    	int strength = (int) cap.getBurnStrength(AllomancyCapability.STEEL);
-//                        RayTraceResult trace = ClientUtils.getMouseOverExtended(5 + (strength / 2));
-//                        if (trace != null) {
-//                            if (trace.getType() == RayTraceResult.Type.ENTITY && AllomancyUtils.isEntityMetal(((EntityRayTraceResult) trace).getEntity(), cap.getBurnStrength(AllomancyCapability.STEEL))) {
-//                                NetworkHelper.sendToServer(new TryPushPullEntity(((EntityRayTraceResult) trace).getEntity().getEntityId(), AllomancyUtils.PUSH, cap.getBurnStrength(AllomancyCapability.STEEL)));
-//                            }
+//                if (this.mc.gameSettings.keyBindAttack.isKeyDown() && (player.isSneaking() || player.isOnePlayerRiding())) {
+//                    // Ray trace 30 blocks
+//                	
+//                    // All iron pulling powers
+//                    if (cap.getMetalBurning(AllomancyCapability.IRON)) {
+//                    	activeIron();
+//                    }
+//                    
+//                    
+//                    
+//                    
+//                    
+//                    // All zinc powers
+//                    if (cap.getMetalBurning(AllomancyCapability.ZINC) && (player.isSneaking() || player.isOnePlayerRiding())) {
+//                    	activeZinc();
+//                    }
+//                }
 //
-//                            if (trace.getType() == RayTraceResult.Type.BLOCK) {
-//                                BlockPos bp = ((BlockRayTraceResult) trace).getPos();
-//                                if (AllomancyUtils.isBlockMetal(this.mc.world.getBlockState(bp).getBlock()) || (player.getHeldItemMainhand().getItem() == Registry.coin_bag && player.isSneaking())) {
-//                                    NetworkHelper.sendToServer(new TryPushPullBlock(bp, AllomancyUtils.PUSH, cap.getBurnStrength(AllomancyCapability.STEEL)));
-//                                }
-//                            }
-//                        }
-                    	BlockPos foundPos = null;
-                    	double dist = 10000f;
-                    	
-                    	RayTraceResult pos = ClientUtils.getMouseOverExtended(100);
-                    	Entity tarEnt = null;
-                    	BlockPos tarBlock = null;
-                    	
-                    	if(pos != null) {
-	                    	if(pos.getType() == RayTraceResult.Type.ENTITY )
-	                    	{
-	                    		foundPos = ((EntityRayTraceResult) pos).getEntity().getPosition();
-	                    	} else if (pos.getType() == RayTraceResult.Type.BLOCK) {
-	                    		foundPos = ((BlockRayTraceResult) pos).getPos();
-	                    	}
-                    	
-	                    	if(foundPos != null) {
-		                    	for(Entity entity : metal_entities) {
-		                    		if(entity.getPosition().distanceSq(foundPos) < dist)
-		                    		{
-		                    			tarEnt = entity;
-		                    			dist = entity.getPosition().distanceSq(foundPos);
-		                    		}
-		                    	}
-		                    	
-		                    	for(BlockPos block : metal_blocks) {
-		                    		if(block.distanceSq(foundPos) < dist)
-		                    		{
-		                    			tarBlock = block;
-		                    			dist = block.distanceSq(foundPos);
-		                    		}
-		                    	}
-	                    	}
-                    	}
-                    	
-
-                        //RayTraceResult trace = ClientUtils.getMouseOverExtended(5 + (strength / 2));
-
-                            if (tarEnt != null) {
-                                NetworkHelper.sendToServer(new TryPushPullEntity(tarEnt.getEntityId(), AllomancyUtils.PUSH, cap.getBurnStrength(AllomancyCapability.STEEL)));
-                            } else if (tarBlock != null) {
-                                //BlockPos bp = ((BlockRayTraceResult) trace).getPos();
-                                if (AllomancyUtils.isBlockMetal(this.mc.world.getBlockState(tarBlock).getBlock()) || (player.getHeldItemMainhand().getItem() == Registry.coin_bag && player.isSneaking())) {
-                                    NetworkHelper.sendToServer(new TryPushPullBlock(tarBlock, AllomancyUtils.PUSH, cap.getBurnStrength(AllomancyCapability.STEEL)));
-                                }
-                            }
-                        
-                    
-                    	
-                    }
-                    // All brass powers
-                    if (cap.getMetalBurning(AllomancyCapability.BRASS) && player.isSneaking()) {
-                    	int strength = (int) cap.getBurnStrength(AllomancyCapability.BRASS);
-                        RayTraceResult trace = ClientUtils.getMouseOverExtended(5 + (strength / 2));
-                        Entity entity;
-                        if ((trace != null) && (trace.getType() == RayTraceResult.Type.ENTITY)) {
-                            entity = ((EntityRayTraceResult) trace).getEntity();
-                            if (entity instanceof CreatureEntity) {
-                                NetworkHelper.sendToServer(new ChangeEmotionPacket(entity.getEntityId(), ChangeEmotionPacket.emotion.CALM, cap.getBurnStrength(AllomancyCapability.BRASS)));
-                            }
-                        }
-                    }
-                }
+//                
+//                
+//                if (this.mc.gameSettings.keyBindUseItem.isKeyDown()) {
+//                	
+//                    // All steel pushing powers
+//                    if (cap.getMetalBurning(AllomancyCapability.STEEL) && (player.isSneaking() || player.isOnePlayerRiding())) {
+//                    	activeSteel();
+//                    	
+//                    }
+//                    // All brass powers
+//                    if (cap.getMetalBurning(AllomancyCapability.BRASS) && player.isSneaking()) {
+//                    	activeBrass();
+//                    
+//                    }
+//                }
 
 
                 
@@ -391,67 +263,20 @@ public class ClientEventHandler {
                 nearby_allomancers.clear();
                 
              // Add metal burners to a list
-                
-                
-                
-                
-//                if (cap.getMetalBurning(AllomancyCapability.COPPER))
-//                {
-//                	
-//                	float strength = cap.getBurnStrength(AllomancyCapability.BRONZE);
-//                	int xLoc = (int) player.posX, yLoc = (int) player.posY, zLoc = (int) player.posZ;
-//                    BlockPos negative = new BlockPos(xLoc - strength * 2, yLoc - strength, zLoc - strength * 2);
-//                    BlockPos positive = new BlockPos(xLoc + strength * 2, yLoc + strength, zLoc + strength * 2);
-//                    
-//                   /* List<CreeperEntity> nearbyAllomanticMobCreeper;
-//                    List<SkeletonEntity> nearbyAllomanticMobSkeleton;
-//                    List<WitherSkeletonEntity> nearbyAllomanticMobWitherSkeleton;
-//                    List<WitherEntity> nearbyAllomanticMobWither;*/
-//                    
-//                    List<Entity> nearby;
-//                    nearby = player.world.getEntitiesWithinAABB(Entity.class, new AxisAlignedBB(negative, positive), entity -> entity != null);
-//                    
-//                    for(Entity entity : nearby)
-//                    {
-//                    	try {
-//                    		AllomancyCapability.forPlayer(entity).setIsInCoppercloud(cap.getBurnStrength(AllomancyCapability.COPPER) + 5);
-//                    	} finally {}
-//                    	
-//                    	if(entity instanceof CreeperEntity || entity instanceof SkeletonEntity || entity instanceof WitherSkeletonEntity || entity instanceof WitherEntity) {
-//                    		if(entity.getDistance(player) > (40 / strength))
-//                        	{
-//                        		NetworkHelper.sendToServer(new ChangeEmotionPacket(entity.getEntityId(), ChangeEmotionPacket.emotion.IGNORE, cap.getBurnStrength(AllomancyCapability.COPPER)));
-//                        	}
-//                    	}
-//                    }
-                    
-                    
-                //}
-                
-                
+
                 if (cap.getMetalBurning(AllomancyCapability.BRONZE)) {
                 	
-                	float strength = cap.getBurnStrength(AllomancyCapability.BRONZE);
+                	float strength = cap.getCalcBurnStrength(AllomancyCapability.BRONZE);
                 	int xLoc = (int) player.posX, yLoc = (int) player.posY, zLoc = (int) player.posZ;
                     BlockPos negative = new BlockPos(xLoc - strength * 2, yLoc - strength, zLoc - strength * 2);
                     BlockPos positive = new BlockPos(xLoc + strength * 2, yLoc + strength, zLoc + strength * 2);
-                    
-                    /*List<CreeperEntity> nearbyAllomanticMobCreeper;
-                    List<SkeletonEntity> nearbyAllomanticMobSkeleton;
-                    List<WitherSkeletonEntity> nearbyAllomanticMobWitherSkeleton;
-                    List<WitherEntity> nearbyAllomanticMobWither;
-                    
-                    nearbyAllomanticMobCreeper = player.world.getEntitiesWithinAABB(CreeperEntity.class, new AxisAlignedBB(negative, positive), entity -> entity != null);
-                    nearbyAllomanticMobSkeleton = player.world.getEntitiesWithinAABB(SkeletonEntity.class, new AxisAlignedBB(negative, positive), entity -> entity != null);
-                    nearbyAllomanticMobWitherSkeleton = player.world.getEntitiesWithinAABB(WitherSkeletonEntity.class, new AxisAlignedBB(negative, positive), entity -> entity != null);
-                    nearbyAllomanticMobWither = player.world.getEntitiesWithinAABB(WitherEntity.class, new AxisAlignedBB(negative, positive), entity -> entity != null);*/
-                    
+
                     List<LivingEntity> nearby;
                     nearby = player.world.getEntitiesWithinAABB(LivingEntity.class, new AxisAlignedBB(negative, positive), entity -> entity != null);
                     for(LivingEntity entity : nearby) {
                     	try {
                     		AllomancyCapability capOther = AllomancyCapability.forPlayer(entity);
-	                    	if(capOther.isInCoppercloud() < cap.getBurnStrength(AllomancyCapability.BRONZE) && !entity.equals(player)) {
+	                    	if((!(capOther.isInCoppercloud() > 0) || (cap.getCalcBurnStrength(AllomancyCapability.BRONZE) > 40 && cap.getCalcBurnStrength(AllomancyCapability.BRONZE) > capOther.isInCoppercloud())) && !entity.equals(player)) {
 	                    		if (entity instanceof CreeperEntity || entity instanceof SkeletonEntity || entity instanceof WitherSkeletonEntity || entity instanceof WitherEntity || capOther.isBurningMetal()) {
 	                    			nearby_allomancers.add(entity);
 	                    		}
@@ -460,45 +285,6 @@ public class ClientEventHandler {
                     	} finally {}
                     	
                     }
-                	
-                	
-                	
-                	
-                    /*List<PlayerEntity> nearby_players;
-                    
-                    // Add entities to metal list
-                    nearby_players = player.world.getEntitiesWithinAABB(PlayerEntity.class, new AxisAlignedBB(negative, positive), entity -> entity != null);
-                    
-
-                    for (CreeperEntity creeper : nearbyAllomanticMobCreeper) {
-                    	nearby_allomancers.add(creeper);
-                    }
-                    
-                    
-                    for (SkeletonEntity skeleton : nearbyAllomanticMobSkeleton) {
-                    	nearby_allomancers.add(skeleton);
-                    }
-                    
-                    for (WitherSkeletonEntity witherSkeleton : nearbyAllomanticMobWitherSkeleton) {
-                    	nearby_allomancers.add(witherSkeleton);
-                    }
-                    
-                    for (WitherEntity wither : nearbyAllomanticMobWither) {
-                    	nearby_allomancers.add(wither);
-                    }
-                    
-                    for (PlayerEntity otherPlayer : nearby_players) {
-                        AllomancyCapability capOther = AllomancyCapability.forPlayer(otherPlayer);
-                        if (capOther.getMetalBurning(AllomancyCapability.COPPER)) { // player is inside a smoker cloud, should not detect
-                            nearby_allomancers.clear();
-                            return;
-                        } else if (capOther.getMetalBurning(AllomancyCapability.IRON) || capOther.getMetalBurning(AllomancyCapability.STEEL) || capOther.getMetalBurning(AllomancyCapability.TIN)
-                                || capOther.getMetalBurning(AllomancyCapability.PEWTER) || capOther.getMetalBurning(AllomancyCapability.ZINC) || capOther.getMetalBurning(AllomancyCapability.BRASS)
-                                || capOther.getMetalBurning(AllomancyCapability.BRONZE)) {
-                            nearby_allomancers.add(otherPlayer);
-                        }
-                    }*/
-                    
                     
                 }
             }
@@ -512,6 +298,26 @@ public class ClientEventHandler {
     @OnlyIn(Dist.CLIENT)
     @SubscribeEvent
     public void onKeyInput(final InputEvent.KeyInputEvent event) {
+    	if(Registry.activeIron.isPressed()) {
+    		activeIron();
+    	}
+    	
+    	if(Registry.activeZinc.isPressed()) {
+    		activeZinc();
+    	}
+    	
+    	if(Registry.activeSteel.isPressed()) {
+    		activeSteel();
+   		
+    	}
+    	
+    	if(Registry.activeBrass.isPressed()) {
+    		activeBrass();
+
+    	}
+    	
+    	
+    	
         if (Registry.burn.isPressed()) {
             PlayerEntity player = mc.player;
             AllomancyCapability cap;
@@ -579,18 +385,6 @@ public class ClientEventHandler {
         }
         
         
-//        if(Registry.mark.isPressed() && mc.player.isSneaking() && AllomancyCapability.forPlayer(mc.player).getMarkedLocations().size() > 0) {
-//        	if(!activateMarks) {
-//        		activateMarks = true;
-//        		mc.player.sendMessage(new TranslationTextComponent("Activate Marks"));
-//        	} else {
-//        		activateMarks = false;
-//        		AllomancyCapability.forPlayer(mc.player).resetMarkedLocation();
-//        		mc.player.sendMessage(new TranslationTextComponent("Deactivate Marks!"));
-//        	}
-//        } 
-        
-        
         if(Registry.mark.isPressed()) {
         	if(!mc.player.isSneaking()) {
 	        	mc.player.sendMessage(new TranslationTextComponent("Enter M"));
@@ -634,6 +428,235 @@ public class ClientEventHandler {
             		mc.player.sendMessage(new TranslationTextComponent("Deactivate Marks!"));
             	}
         	}
+        }
+    }
+    
+    public void activeIron()
+    {
+    	PlayerEntity player = mc.player;
+        AllomancyCapability cap;
+        cap = AllomancyCapability.forPlayer(player);
+        
+		if (cap.getMetalBurning(AllomancyCapability.IRON)) {
+        	int strength = (int) cap.getCalcBurnStrength(AllomancyCapability.IRON);
+        	
+        	BlockPos foundPos = null;
+        	double dist = 10000f;
+        	
+        	RayTraceResult pos = ClientUtils.getMouseOverExtended(100);
+        	Entity tarEnt = null;
+        	BlockPos tarBlock = null;
+        	double blockDist = 1000;
+        	double entDist = 1000;
+        	Boolean blockClosest = false;
+        	
+        	if(pos != null) {
+            	if(pos.getType() == RayTraceResult.Type.ENTITY )
+            	{
+            		foundPos = ((EntityRayTraceResult) pos).getEntity().getPosition();
+            	} else if (pos.getType() == RayTraceResult.Type.BLOCK) {
+            		foundPos = ((BlockRayTraceResult) pos).getPos();
+            	}
+        	
+        	
+        	
+            	if(foundPos != null) {
+                	for(Entity entity : metal_entities) {
+                		if(entity.getPosition().distanceSq(foundPos) < dist)
+                		{
+                			entDist = entity.getPosition().distanceSq(foundPos);
+                			tarEnt = entity;
+                			dist = entity.getPosition().distanceSq(foundPos);
+                		}
+                	}
+                	
+                	for(BlockPos block : metal_blocks) {
+                		if(block.distanceSq(foundPos) < dist)
+                		{
+                			blockDist = block.distanceSq(foundPos);
+                			tarBlock = block;
+                			dist = block.distanceSq(foundPos);
+                		}
+                	}
+            	}
+        	}
+        	
+        	if(blockDist < entDist)
+        		blockClosest = true;
+
+            //RayTraceResult trace = ClientUtils.getMouseOverExtended(5 + (strength / 2));
+
+                if (tarEnt != null && !blockClosest) {
+                    NetworkHelper.sendToServer(new TryPushPullEntity(tarEnt.getEntityId(), AllomancyUtils.PULL, cap.getCalcBurnStrength(AllomancyCapability.IRON)));
+                } else if (tarBlock != null) {
+                    //BlockPos bp = ((BlockRayTraceResult) trace).getPos();
+                    if (AllomancyUtils.isBlockMetal(this.mc.world.getBlockState(tarBlock).getBlock()) || (player.getHeldItemMainhand().getItem() == Registry.coin_bag && player.isSneaking())) {
+                        NetworkHelper.sendToServer(new TryPushPullBlock(tarBlock, AllomancyUtils.PULL, cap.getCalcBurnStrength(AllomancyCapability.IRON)));
+                    }
+                }
+            
+        }
+    }
+    
+    public void activeSteel()
+    {
+    	PlayerEntity player = mc.player;
+        AllomancyCapability cap;
+        cap = AllomancyCapability.forPlayer(player);
+        if (cap.getMetalBurning(AllomancyCapability.STEEL)) {
+        	BlockPos foundPos = null;
+        	double dist = 10000f;
+        	double blockDist = 1000;
+        	double entDist = 1000;
+        	Boolean blockClosest = false;
+        	
+        	RayTraceResult pos = ClientUtils.getMouseOverExtended(100);
+        	Entity tarEnt = null;
+        	BlockPos tarBlock = null;
+        	
+        	if(pos != null) {
+            	if(pos.getType() == RayTraceResult.Type.ENTITY )
+            	{
+            		foundPos = ((EntityRayTraceResult) pos).getEntity().getPosition();
+            	} else if (pos.getType() == RayTraceResult.Type.BLOCK) {
+            		foundPos = ((BlockRayTraceResult) pos).getPos();
+            	}
+        	
+            	if(foundPos != null) {
+                	for(Entity entity : metal_entities) {
+                		if(entity.getPosition().distanceSq(foundPos) < dist)
+                		{
+                			entDist = entity.getPosition().distanceSq(foundPos);
+                			tarEnt = entity;
+                			dist = entity.getPosition().distanceSq(foundPos);
+                		}
+                	}
+                	
+                	
+                	for(BlockPos block : metal_blocks) {
+                		if(block.distanceSq(foundPos) < dist)
+                		{
+                			blockDist = block.distanceSq(foundPos);
+                			tarBlock = block;
+                			dist = block.distanceSq(foundPos);
+                		}
+                	}
+            	}
+        	}
+        	
+
+        	if(blockDist < entDist)
+        		blockClosest = true;
+        	
+            //RayTraceResult trace = ClientUtils.getMouseOverExtended(5 + (strength / 2));
+        		int power;
+        		if(player.isSneaking())
+        			power = 5;
+        		else
+        			power = cap.getCalcBurnStrength(AllomancyCapability.STEEL);
+        			
+                if (tarEnt != null && !blockClosest) {
+                    NetworkHelper.sendToServer(new TryPushPullEntity(tarEnt.getEntityId(), AllomancyUtils.PUSH, power));
+                } else if (tarBlock != null) {
+                    //BlockPos bp = ((BlockRayTraceResult) trace).getPos();
+                    if (AllomancyUtils.isBlockMetal(this.mc.world.getBlockState(tarBlock).getBlock()) || (player.getHeldItemMainhand().getItem() == Registry.coin_bag && player.isSneaking())) {
+                        NetworkHelper.sendToServer(new TryPushPullBlock(tarBlock, AllomancyUtils.PUSH, power));
+                    }
+                }
+        }
+    }
+    
+    public void activeZinc()
+    {
+    	PlayerEntity player = mc.player;
+        AllomancyCapability cap;
+        cap = AllomancyCapability.forPlayer(player);
+        
+		if (cap.getMetalBurning(AllomancyCapability.ZINC)) {
+        	int strength = (int) cap.getCalcBurnStrength(AllomancyCapability.ZINC);
+            RayTraceResult trace = ClientUtils.getMouseOverExtended(5 + (strength / 2));
+            Entity entity;
+            if ((trace != null) && (trace.getType() == RayTraceResult.Type.ENTITY)) {
+                entity = ((EntityRayTraceResult) trace).getEntity();
+                if(strength > 40)
+                {
+                	int xLoc = (int) entity.posX, yLoc = (int) entity.posY, zLoc = (int) entity.posZ;
+	                BlockPos negative = new BlockPos(xLoc - (strength /2), yLoc - (strength /2), zLoc - (strength /2));
+	                BlockPos positive = new BlockPos(xLoc + (strength /2), yLoc + (strength /2), zLoc + (strength /2));
+	                
+	                List<LivingEntity> nearby;
+	                nearby = player.world.getEntitiesWithinAABB(LivingEntity.class, new AxisAlignedBB(negative, positive), entityb -> entityb != null);
+	                
+	                for(LivingEntity entityb : nearby)
+	                {	
+	                	if(!AllomancyCapability.forPlayer(player).getMetalBurning(AllomancyCapability.COPPER))
+	                	{
+		                	if (entity instanceof CreatureEntity) 
+		                		NetworkHelper.sendToServer(new ChangeEmotionPacket(entityb.getEntityId(), ChangeEmotionPacket.emotion.AGGRO, cap.getCalcBurnStrength(AllomancyCapability.ZINC)));
+		                	else if (entity instanceof PlayerEntity) {
+		                		((LivingEntity) entity).addPotionEffect(new EffectInstance(Effects.STRENGTH, 600, 1, false, false, false));
+	                        	((LivingEntity) entity).addPotionEffect(new EffectInstance(Effects.RESISTANCE, 600, -2, false, false, false));
+		                	}
+	                	}
+	                }
+                } else if (entity instanceof CreatureEntity) {
+                	if(!AllomancyCapability.forPlayer(player).getMetalBurning(AllomancyCapability.COPPER))
+                		NetworkHelper.sendToServer(new ChangeEmotionPacket(entity.getEntityId(), ChangeEmotionPacket.emotion.AGGRO, cap.getCalcBurnStrength(AllomancyCapability.ZINC)));
+                } else if (entity instanceof PlayerEntity) {
+                	if(!AllomancyCapability.forPlayer(player).getMetalBurning(AllomancyCapability.COPPER))
+                	{
+	            		((LivingEntity) entity).addPotionEffect(new EffectInstance(Effects.STRENGTH, 600, 0, false, false, false));
+	                	((LivingEntity) entity).addPotionEffect(new EffectInstance(Effects.RESISTANCE, 600, -1, false, false, false));
+                	}
+            	}
+            }
+        }
+    }
+    
+    public void activeBrass()
+    {
+    	PlayerEntity player = mc.player;
+        AllomancyCapability cap;
+        cap = AllomancyCapability.forPlayer(player);
+        
+        if (cap.getMetalBurning(AllomancyCapability.BRASS)) {
+        	int strength = (int) cap.getCalcBurnStrength(AllomancyCapability.BRASS);
+            RayTraceResult trace = ClientUtils.getMouseOverExtended(5 + (strength / 2));
+            Entity entity;
+            if ((trace != null) && (trace.getType() == RayTraceResult.Type.ENTITY)) {
+                entity = ((EntityRayTraceResult) trace).getEntity();
+                if(strength > 40)
+                {
+                	int xLoc = (int) entity.posX, yLoc = (int) entity.posY, zLoc = (int) entity.posZ;
+	                BlockPos negative = new BlockPos(xLoc - (strength /2), yLoc - (strength /2), zLoc - (strength /2));
+	                BlockPos positive = new BlockPos(xLoc + (strength /2), yLoc + (strength /2), zLoc + (strength /2));
+	                
+	                List<LivingEntity> nearby;
+	                nearby = player.world.getEntitiesWithinAABB(LivingEntity.class, new AxisAlignedBB(negative, positive), entityb -> entityb != null);
+	                
+	                for(LivingEntity entityb : nearby)
+	                {	
+	                	if(!AllomancyCapability.forPlayer(player).getMetalBurning(AllomancyCapability.COPPER))
+	                	{
+		                	if (entity instanceof CreatureEntity) 
+		                		NetworkHelper.sendToServer(new ChangeEmotionPacket(entityb.getEntityId(), ChangeEmotionPacket.emotion.CALM, cap.getCalcBurnStrength(AllomancyCapability.BRASS)));
+		                	else if (entity instanceof PlayerEntity) {
+		                		((LivingEntity) entity).addPotionEffect(new EffectInstance(Effects.WEAKNESS, 600, 1, false, false, false));
+	                        	((LivingEntity) entity).addPotionEffect(new EffectInstance(Effects.RESISTANCE, 600, 1, false, false, false));
+		                	}
+	                	}
+	                		
+	                }
+                } else if (entity instanceof CreatureEntity) {
+                	if(!AllomancyCapability.forPlayer(player).getMetalBurning(AllomancyCapability.COPPER))
+                		NetworkHelper.sendToServer(new ChangeEmotionPacket(entity.getEntityId(), ChangeEmotionPacket.emotion.CALM, cap.getCalcBurnStrength(AllomancyCapability.BRASS)));
+                } else if (entity instanceof PlayerEntity) {
+                	if(!AllomancyCapability.forPlayer(player).getMetalBurning(AllomancyCapability.COPPER)) {
+	                	((LivingEntity) entity).addPotionEffect(new EffectInstance(Effects.WEAKNESS, 600, 0, false, false, false));
+	                	((LivingEntity) entity).addPotionEffect(new EffectInstance(Effects.RESISTANCE, 600, 0, false, false, false));
+                	}
+                }
+            }
         }
     }
 
@@ -694,7 +717,34 @@ public class ClientEventHandler {
 
         if ((cap.getMetalBurning(AllomancyCapability.BRONZE) && !cap.getMetalBurning(AllomancyCapability.COPPER))) {
             for (Entity entity : nearby_allomancers) {
-                ClientUtils.drawMetalLine(playerX, playerY, playerZ, entity.posX, entity.posY - 0.5, entity.posZ, 3.0F, 0.7F, 0.15F, 0.15F);
+            	if(cap.getCalcBurnStrength(AllomancyCapability.BRONZE) < 15)
+            		ClientUtils.drawMetalLine(playerX, playerY, playerZ, entity.posX, entity.posY - 0.5, entity.posZ, 3.0F, 0.7F, 0.15F, 0.15F);
+            	else
+            	{
+            		AllomancyCapability entityCap = AllomancyCapability.forPlayer(entity);
+            		if(entityCap.getMetalBurning(AllomancyCapability.IRON))
+            			ClientUtils.drawMetalLine(playerX, playerY, playerZ, entity.posX, entity.posY - 0.5, entity.posZ, entityCap.getCalcBurnStrength(AllomancyCapability.IRON)/4, 0.5F, 0.0F, 0.0F);
+            		if(entityCap.getMetalBurning(AllomancyCapability.STEEL))
+            			ClientUtils.drawMetalLine(playerX, playerY, playerZ, entity.posX, entity.posY - 0.5, entity.posZ, entityCap.getCalcBurnStrength(AllomancyCapability.STEEL)/4, 0.5F, 0.25F, 0.0F);
+            		if(entityCap.getMetalBurning(AllomancyCapability.COPPER))
+            			ClientUtils.drawMetalLine(playerX, playerY, playerZ, entity.posX, entity.posY - 0.5, entity.posZ, entityCap.getCalcBurnStrength(AllomancyCapability.COPPER)/4, 0.0F, 0.5F, 0.0F);
+            		if(entityCap.getMetalBurning(AllomancyCapability.BRONZE))
+            			ClientUtils.drawMetalLine(playerX, playerY, playerZ, entity.posX, entity.posY - 0.5, entity.posZ, entityCap.getCalcBurnStrength(AllomancyCapability.BRONZE)/4, 0.0F, 0.5F, 0.25F);
+            		if(entityCap.getMetalBurning(AllomancyCapability.TIN))
+            			ClientUtils.drawMetalLine(playerX, playerY, playerZ, entity.posX, entity.posY - 0.5, entity.posZ, entityCap.getCalcBurnStrength(AllomancyCapability.TIN)/4, 0.0F, 0.0F, 0.5F);
+            		if(entityCap.getMetalBurning(AllomancyCapability.PEWTER))
+            			ClientUtils.drawMetalLine(playerX, playerY, playerZ, entity.posX, entity.posY - 0.5, entity.posZ, entityCap.getCalcBurnStrength(AllomancyCapability.PEWTER)/4, 0.25F, 0.0F, 0.5F);
+            		if(entityCap.getMetalBurning(AllomancyCapability.ZINC))
+            			ClientUtils.drawMetalLine(playerX, playerY, playerZ, entity.posX, entity.posY - 0.5, entity.posZ, entityCap.getCalcBurnStrength(AllomancyCapability.ZINC)/4, 0.0F, 0.5F, 0.5F);
+            		if(entityCap.getMetalBurning(AllomancyCapability.BRASS))
+            			ClientUtils.drawMetalLine(playerX, playerY, playerZ, entity.posX, entity.posY - 0.5, entity.posZ, entityCap.getCalcBurnStrength(AllomancyCapability.BRASS)/4, 0.25F, 0.5F, 0.5F);
+
+            				
+            		if (entity instanceof CreeperEntity || entity instanceof SkeletonEntity || entity instanceof WitherSkeletonEntity)
+            			ClientUtils.drawMetalLine(playerX, playerY, playerZ, entity.posX, entity.posY - 0.5, entity.posZ, 2.0f, 1.0F, 1.0F, 1.0F);
+            			
+            		
+            	}
             }
 
         }
@@ -715,7 +765,7 @@ public class ClientEventHandler {
         AllomancyCapability cap = AllomancyCapability.forPlayer(player);
         if (cap.getMetalBurning(AllomancyCapability.TIN)) {
         	
-        	float strength = cap.getBurnStrength(AllomancyCapability.TIN);
+        	float strength = cap.getCalcBurnStrength(AllomancyCapability.TIN);
 
             magnitude = Math.sqrt(Math.pow((player.posX - sound.getX()), 2) + Math.pow((player.posY - sound.getY()), 2) + Math.pow((player.posZ - sound.getZ()), 2));
 

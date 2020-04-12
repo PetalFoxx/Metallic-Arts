@@ -42,6 +42,7 @@ public class PewterMetalMind extends MetalMindItem {
 			gain(item);
 			item.getTag().putBoolean("used", false);
 		}
+
 	}
 
 	@Override

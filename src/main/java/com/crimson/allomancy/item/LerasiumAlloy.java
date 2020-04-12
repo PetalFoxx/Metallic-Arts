@@ -2,6 +2,7 @@ package com.crimson.allomancy.item;
 
 import com.crimson.allomancy.Allomancy;
 import com.crimson.allomancy.util.AllomancyCapability;
+import com.crimson.allomancy.util.Metal;
 import com.crimson.allomancy.util.Registry;
 
 import net.minecraft.client.util.ITooltipFlag;
@@ -32,7 +33,7 @@ public class LerasiumAlloy extends Item {
 
     public LerasiumAlloy(int metal) {
         super(new Item.Properties().group(Registry.allomancy_group).rarity(Rarity.RARE).maxStackSize(1).food(lerasium));
-        this.setRegistryName(new ResourceLocation(Allomancy.MODID, Registry.allomanctic_metals[metal] + "_lerasium_nugget"));
+        this.setRegistryName(new ResourceLocation(Allomancy.MODID, Metal.getMetal(metal).getName() + "_lerasium_nugget"));
         this.metal = metal;
     }
 
@@ -53,7 +54,7 @@ public class LerasiumAlloy extends Item {
         double y = livingEntity.posY + 3;
         double z = livingEntity.posZ;
         cap.setCanBurn(metal, true);
-        cap.setBurnStrength(metal, cap.getBurnStrength(metal) + 5);
+        cap.setBurnStrength(metal, cap.getTrueBurnStrength(metal) + 5);
         
         cap.setIsAllomancer(true);
         //Fancy shmancy effects

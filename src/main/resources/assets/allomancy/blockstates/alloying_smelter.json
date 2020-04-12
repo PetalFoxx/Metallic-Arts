@@ -1,5 +1,20 @@
 {
-	"variants": {
-          "": { "model": "allomancy:block/alloying_smelter" }
-   }
+  "variants": 
+  	{
+	    "facing=north": {
+	      "model": "allomancy:block/alloying_smelter"
+	    },
+	    "facing=south": {
+	      "model": "allomancy:block/alloying_smelter",
+	      "y": 180
+	    },
+	    "facing=west": {
+	      "model": "allomancy:block/alloying_smelter",
+	      "y": 270
+	    },
+	    "facing=east": {
+	      "model": "allomancy:block/alloying_smelter",
+	      "y": 90
+	    }
+    }
 }

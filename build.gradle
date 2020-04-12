@@ -12,9 +12,9 @@ apply plugin: 'net.minecraftforge.gradle'
 // Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 apply plugin: 'eclipse'
 
-version = "0.9.0" 
-group= "com.legobmw99.allomancy" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
-archivesBaseName = "allomancy"
+version = "0.5.0" 
+group= "com.crimsonmasques.the_metallic_arts" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+archivesBaseName = "the_metallic_arts"
 
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
 
@@ -96,7 +96,7 @@ dependencies {
 jar {
     manifest {
         attributes([
-            "Specification-Title": "allomancy",
+            "Specification-Title": "The Metallic Arts",
             "Specification-Vendor": "CrimsonMasques",
             "Specification-Version": "1", // We are version 1 of ourselves
             "Implementation-Title": project.name,

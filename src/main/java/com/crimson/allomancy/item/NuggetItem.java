@@ -34,7 +34,7 @@ public class NuggetItem extends Item {
                 if (!player.abilities.isCreativeMode) {
                     itemstack.shrink(1);
                 }
-                float strength = AllomancyCapability.forPlayer(player).getBurnStrength(AllomancyCapability.STEEL);
+                float strength = AllomancyCapability.forPlayer(player).getCalcBurnStrength(AllomancyCapability.STEEL);
                 NuggetEntity nuggetEntity = new NuggetEntity(Registry.getNuggetEntities()[metal], player, world, metal);
                 nuggetEntity.setStrength(strength);
                 nuggetEntity.shoot(player, player.rotationPitch, player.rotationYaw, 0.0F, 2.5F * (strength / 10), 1.0F);

@@ -1,4 +1,4 @@
-package com.crimson.allomancy.item.metalmind;
+/*package com.crimson.allomancy.item.metalmind;
 
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Potion;
@@ -48,3 +48,4 @@ public class MetalMindPotion extends Potion {
         return super.getStatusIconIndex();
     }
 }
+*/

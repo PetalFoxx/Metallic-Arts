@@ -41,6 +41,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootPool;
 import net.minecraft.world.storage.loot.TableLootEntry;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
+import net.minecraftforge.common.extensions.IForgeEntity;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.event.TickEvent;
@@ -48,6 +49,7 @@ import net.minecraftforge.event.entity.EntityEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.minecraftforge.event.entity.living.LivingSpawnEvent;
 import net.minecraftforge.event.entity.player.ArrowLooseEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerPickupXpEvent;
@@ -56,6 +58,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 import java.util.List;
+import java.util.Random;
 
 //@Mod.EventBusSubscriber(modid = Allomancy.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class CommonEventHandler {
@@ -84,15 +87,13 @@ public class CommonEventHandler {
                         cap.setCanBurn(randomMisting, true);
                         cap.setIsAllomancer(true);
                 	} else if (random < 7) {
-                		byte randomFerring = (byte) (Math.random() * 8);
-                        cap.setCanStore(randomFerring, true);
+                        cap.setCanStore(assignFerring(), true);
                         cap.setIsAllomancer(true);
                 	} else {
                 		byte randomMisting = (byte) (Math.random() * 8);
                         cap.setCanBurn(randomMisting, true);
                         
-                        byte randomFerring = (byte) (Math.random() * 8);
-                        cap.setCanStore(randomFerring, true);
+                        cap.setCanStore(assignFerring(), true);
                         
                         cap.setIsAllomancer(true);
                 	}
@@ -103,6 +104,15 @@ public class CommonEventHandler {
                 NetworkHelper.sync(event.getPlayer());
             }
         }
+    }
+    
+    public byte assignFerring() {
+    	byte power;
+    	power = (byte) (Math.random() * 8);
+    	while(power == 7 || power == 5) {
+    		power = (byte) (Math.random() * 8);
+    	}
+    	return power;
     }
 
     @SubscribeEvent
@@ -123,7 +133,16 @@ public class CommonEventHandler {
             	}
             	
             	for (int i = 0; i < 8; i++) {
-            		cap.setBurnStrength(i, oldCap.getBurnStrength(i));
+            		if (oldCap.canStore(i))
+            			cap.setCanStore(i, true);
+            	}
+            	
+            	for (int i = 0; i < 8; i++) {
+            		cap.setBurnStrength(i, oldCap.getTrueBurnStrength(i));
+            	}
+            	
+            	for (int i = 0; i < 8; i++) {
+            		cap.setSavant(i, oldCap.getSavant(i));
             	}
             	
             	cap.setIsAllomancer(oldCap.isAllomancer());
@@ -180,7 +199,7 @@ public class CommonEventHandler {
 	            AllomancyCapability cap = AllomancyCapability.forPlayer(source);
 	
 	            if (cap.getMetalBurning(AllomancyCapability.PEWTER)) {
-	                event.setAmount(event.getAmount() + (2 * (cap.getBurnStrength(AllomancyCapability.PEWTER) / 10) ));
+	                event.setAmount(event.getAmount() + (2 * (cap.getCalcBurnStrength(AllomancyCapability.PEWTER) / 10) ));
 	            }
 	            
 	            if(cap.hasMetalmind(AllomancyCapability.BRASS))
@@ -211,9 +230,9 @@ public class CommonEventHandler {
         if (event.getEntityLiving() instanceof LivingEntity) {
             AllomancyCapability cap = AllomancyCapability.forPlayer(event.getEntityLiving());
             if (cap.getMetalBurning(AllomancyCapability.PEWTER)) {
-                event.setAmount(event.getAmount() - (1 * (cap.getBurnStrength(AllomancyCapability.PEWTER) / 10) ));
+                event.setAmount(event.getAmount() - (1 * (cap.getCalcBurnStrength(AllomancyCapability.PEWTER) / 10) ));
                 // Note that they took damage, will come in to play if they stop burning
-                cap.setDamageStored(cap.getDamageStored() + (int) (0.5 * (cap.getBurnStrength(AllomancyCapability.PEWTER) / 10) ));
+                cap.setDamageStored(cap.getDamageStored() + (int) (0.5 * (cap.getCalcBurnStrength(AllomancyCapability.PEWTER) / 10) ));
             }
             
             if(cap.hasMetalmind(AllomancyCapability.BRASS))
@@ -256,6 +275,8 @@ public class CommonEventHandler {
         		witherCap.setMetalFlaring(AllomancyCapability.PEWTER, true);
         	}
         }
+        
+    	
     }
     
     
@@ -263,6 +284,7 @@ public class CommonEventHandler {
     
     @SubscribeEvent
     public static void onEntityJoinedWorld(EntityJoinWorldEvent event) {
+    	Random rand = new Random();
     	if(event.getEntity() instanceof ArrowEntity) {
     		ArrowEntity arrow = (ArrowEntity) event.getEntity();
     		Entity firer = arrow.getShooter();
@@ -291,15 +313,15 @@ public class CommonEventHandler {
         		
         		
         		if(cap.getMetalBurning(AllomancyCapability.TIN)) {
-        			arrow.setDamage(arrow.getDamage() * (1 + (0.02 * cap.getBurnStrength(AllomancyCapability.TIN))));
-        			if(cap.getBurnStrength(AllomancyCapability.TIN) >= 30)
+        			arrow.setDamage(arrow.getDamage() * (1 + (0.02 * cap.getCalcBurnStrength(AllomancyCapability.TIN))));
+        			if(cap.getCalcBurnStrength(AllomancyCapability.TIN) >= 30)
         				arrow.setIsCritical(true);
         		}
         		
         		if(cap.getMetalBurning(AllomancyCapability.STEEL)) {
-        			arrow.setDamage(arrow.getDamage() * (1 + (0.01 * cap.getBurnStrength(AllomancyCapability.STEEL))));
+        			arrow.setDamage(arrow.getDamage() * (1 + (0.01 * cap.getCalcBurnStrength(AllomancyCapability.STEEL))));
         			Vec3d motion = arrow.getMotion();
-        			for(int i = 0; i < (cap.getBurnStrength(AllomancyCapability.STEEL)/10); i++) {
+        			for(int i = 0; i < (cap.getCalcBurnStrength(AllomancyCapability.STEEL)/10); i++) {
         				motion.add(motion);
         			}
         			arrow.setMotion(motion);
@@ -309,12 +331,8 @@ public class CommonEventHandler {
     	if (event.getEntity() instanceof ThrowableEntity) {
     		
     	}
-    	
-    	
-    }
-    
-    
 
+    }
 
 
     @SubscribeEvent
@@ -384,20 +402,20 @@ public class CommonEventHandler {
 		            }
 		            if (cap.getMetalBurning(AllomancyCapability.PEWTER)) {
 		                //Add jump boost and speed to pewter burners
-		            	int strength = (int) cap.getBurnStrength(AllomancyCapability.PEWTER) / 10;
+		            	int strength = (int) cap.getCalcBurnStrength(AllomancyCapability.PEWTER) / 10;
 		            	allomancer.addPotionEffect(new EffectInstance(Effects.JUMP_BOOST, 30, strength, true, false));
 		            	allomancer.addPotionEffect(new EffectInstance(Effects.SPEED, 30, strength - 1, true, false));
 		            	allomancer.addPotionEffect(new EffectInstance(Effects.HASTE, 30, strength - 1, true, false));
 		
 		                if (cap.getDamageStored() > 0) {
 		                    if (world.rand.nextInt(200) == 0) {
-		                        cap.setDamageStored(cap.getDamageStored() - (1 * ((int) cap.getBurnStrength(AllomancyCapability.PEWTER) / 20)));
+		                        cap.setDamageStored(cap.getDamageStored() - (1 * ((int) cap.getCalcBurnStrength(AllomancyCapability.PEWTER) / 20)));
 		                    }
 		                }
 		
 		            }
 		            if (cap.getMetalBurning(AllomancyCapability.TIN)) {
-		            	int strength = (int) cap.getBurnStrength(AllomancyCapability.TIN) / 10;
+		            	int strength = (int) cap.getCalcBurnStrength(AllomancyCapability.TIN) / 10;
 		                // Add night vision to tin-burners
 		            	allomancer.addPotionEffect(new EffectInstance(Effects.NIGHT_VISION, Short.MAX_VALUE, strength, true, false));
 		                // Remove blindness for tin burners

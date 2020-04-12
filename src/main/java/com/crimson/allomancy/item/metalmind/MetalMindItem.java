@@ -10,12 +10,14 @@ import com.crimson.allomancy.util.AllomancyCapability;
 import com.crimson.allomancy.util.Registry;
 
 import net.minecraft.block.Block;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.IItemTier;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUseContext;
 import net.minecraft.item.ToolItem;
@@ -23,6 +25,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -140,17 +143,23 @@ public abstract class MetalMindItem extends Item {
 					cap.addActiveMetalMind(player.getHeldItem(hand), metal);
 					world.getPlayerByUuid(item.getTag().getUniqueId("owner")).sendMessage(new TranslationTextComponent("Owner Set"));
 				} else {
-					if(!cap.getMetalmind(metal).equals(item))
-						cap.addActiveMetalMind(player.getHeldItem(hand), metal);
-					
-					if(player.isSneaking() && item.getTag().getString("action") != "filling") {
-						changeAction("filling", world, item);
-					} else if (item.getTag().getString("action") != "tapping") {
-						changeAction("tapping", world, item);
+					if(world.getPlayerByUuid(item.getTag().getUniqueId("owner")).equals(player)) {
+						if(cap.getMetalmind(metal) == null || !cap.getMetalmind(metal).equals(item))
+							cap.addActiveMetalMind(player.getHeldItem(hand), metal);
+						
+						if(player.isSneaking() && item.getTag().getString("action") != "filling") {
+							changeAction("filling", world, item);
+						} else if (item.getTag().getString("action") != "tapping") {
+							changeAction("tapping", world, item);
+						} else {
+							changeAction("inactive", world, item);
+						}
 					} else {
-						changeAction("inactive", world, item);
+						player.sendMessage(new TranslationTextComponent("This Metalmind refuses you"));
 					}
 				}
+			} else {
+				player.sendMessage(new TranslationTextComponent("You feel no attachment to this item"));
 			}
 		}
 		
@@ -213,6 +222,25 @@ public abstract class MetalMindItem extends Item {
 	abstract int getInvestitureCap();
 	
 	
+	@Override
+    public void fillItemGroup(ItemGroup group, NonNullList<ItemStack> items) {
+        if (group == Registry.allomancy_group) {
+            items.add(new ItemStack(this, 1));
+
+            ItemStack resultItem = new ItemStack(this, 1);
+
+            CompoundNBT nbt = new CompoundNBT();
+			nbt.putFloat("investiture", 100000);
+			nbt.putInt("strength", 0);
+			nbt.putString("action", "inactive");
+			nbt.putBoolean("used", false);
+			nbt.putUniqueId("owner", Minecraft.getInstance().player.getUniqueID());
+			resultItem.setTag(nbt);
+			
+            resultItem.setTag(nbt);
+            items.add(resultItem);
+        }
+    }
 
 
 	public enum METALMIND_ACTION {

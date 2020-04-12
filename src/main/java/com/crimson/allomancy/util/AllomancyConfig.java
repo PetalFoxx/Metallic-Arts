@@ -83,29 +83,29 @@ public class AllomancyConfig {
             builder.push("Copper");
             generate_copper = builder.comment("Generate Copper Ore").define("generate_copper", true);
             copper_density = builder.comment("Density of Copper Ore").defineInRange("copper_density", 15, 1, 40);
-            copper_min_y = builder.comment("Minimum Y Level to Generate Copper").defineInRange("copper_min_y", 30, 1, 128);
-            copper_max_y = builder.comment("Maximum Y Level to Generate Copper").defineInRange("copper_max_y", 50, 1, 128);
+            copper_min_y = builder.comment("Minimum Y Level to Generate Copper").defineInRange("copper_min_y", 30, 1, 72);
+            copper_max_y = builder.comment("Maximum Y Level to Generate Copper").defineInRange("copper_max_y", 50, 1, 72);
             builder.pop();
 
             builder.push("Tin");
             generate_tin = builder.comment("Generate Tin Ore").define("generate_tin", true);
             tin_density = builder.comment("Density of Tin Ore").defineInRange("tin_density", 15, 1, 40);
-            tin_min_y = builder.comment("Minimum Y Level to Generate Tin").defineInRange("tin_min_y", 40, 1, 128);
-            tin_max_y = builder.comment("Maximum Y Level to Generate Tin").defineInRange("tin_max_y", 64, 1, 128);
+            tin_min_y = builder.comment("Minimum Y Level to Generate Tin").defineInRange("tin_min_y", 40, 1, 72);
+            tin_max_y = builder.comment("Maximum Y Level to Generate Tin").defineInRange("tin_max_y", 64, 1, 72);
             builder.pop();
 
             builder.push("Lead");
             generate_lead = builder.comment("Generate Lead Ore").define("generate_lead", true);
             lead_density = builder.comment("Density of Lead Ore").defineInRange("lead_density", 15, 1, 40);
-            lead_min_y = builder.comment("Minimum Y Level to Generate Lead").defineInRange("lead_min_y", 20, 1, 128);
-            lead_max_y = builder.comment("Maximum Y Level to Generate Lead").defineInRange("lead_max_y", 40, 1, 128);
+            lead_min_y = builder.comment("Minimum Y Level to Generate Lead").defineInRange("lead_min_y", 20, 1, 72);
+            lead_max_y = builder.comment("Maximum Y Level to Generate Lead").defineInRange("lead_max_y", 40, 1, 72);
             builder.pop();
 
             builder.push("Zinc");
             generate_zinc = builder.comment("Generate Zinc Ore").define("generate_zinc", true);
             zinc_density = builder.comment("Density of Zinc Ore").defineInRange("zinc_density", 12, 1, 40);
-            zinc_min_y = builder.comment("Minimum Y Level to Generate Zinc").defineInRange("zinc_min_y", 20, 1, 128);
-            zinc_max_y = builder.comment("Maximum Y Level to Generate Zinc").defineInRange("zinc_max_y", 40, 1, 128);
+            zinc_min_y = builder.comment("Minimum Y Level to Generate Zinc").defineInRange("zinc_min_y", 20, 1, 72);
+            zinc_max_y = builder.comment("Maximum Y Level to Generate Zinc").defineInRange("zinc_max_y", 40, 1, 72);
             builder.pop();
 
             builder.pop();
@@ -206,6 +206,8 @@ public class AllomancyConfig {
             defaultList.add("allomancy:lead_ingot");
             defaultList.add("allomancy:zinc_ingot");
             defaultList.add("allomancy:bronze_ingot");
+            defaultList.add("allomancy:metal_purifier");
+            defaultList.add("allomancy:alloying_smelter");
 
 
             for (int i = 0; i < Registry.metals.length; i++) {
@@ -299,7 +301,13 @@ public class AllomancyConfig {
     	SLIME(40,80),
     	SHULKER(40,40),
     	RABBIT(5,15),
-    	PHANTOM(30,30)
+    	CHICKEN(5,15),
+    	SHEEP(5,15),
+    	HORSE(5,15),
+    	PHANTOM(30,30), 
+    	POLARBEAR(15,20),
+    	WOLF(15,20),
+    	LLAMA(20,15)
     	;
     	
     	private int emotionDiff;

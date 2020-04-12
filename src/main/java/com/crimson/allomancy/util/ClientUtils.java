@@ -318,9 +318,9 @@ public class ClientUtils {
 
         animationCounter++;
         // left hand side.
-        int ironY, steelY, tinY, pewterY;
+        int ironY = 0, steelY = 0, tinY = 0, pewterY = 0;
         // right hand side
-        int copperY, bronzeY, zincY, brassY;
+        int copperY = 0, bronzeY = 0, zincY = 0, brassY = 0;
         // single metal
         int singleMetalY;
         int renderX, renderY = 0;
@@ -378,70 +378,28 @@ public class ClientUtils {
          * The rendering for a the overlay of a full Mistborn
          */
         /*if (cap.getAllomancyPower() == 8) { */
-
-        
-            ironY = 9 - cap.getMetalAmounts(AllomancyCapability.IRON);
-            gig.blit(renderX + 1, renderY + 5 + ironY, 7, 1 + ironY, 3, 10 - ironY);
-
-            steelY = 9 - cap.getMetalAmounts(AllomancyCapability.STEEL);
-            gig.blit(renderX + 8, renderY + 5 + steelY, 13, 1 + steelY, 3, 10 - steelY);
-
-            tinY = 9 - cap.getMetalAmounts(AllomancyCapability.TIN);
-            gig.blit(renderX + 26, renderY + 5 + tinY, 19, 1 + tinY, 3, 10 - tinY);
-
-            pewterY = 9 - cap.getMetalAmounts(AllomancyCapability.PEWTER);
-            gig.blit(renderX + 33, renderY + 5 + pewterY, 25, 1 + pewterY, 3, 10 - pewterY);
-
-            zincY = 9 - cap.getMetalAmounts(AllomancyCapability.ZINC);
-            gig.blit(renderX + 51, renderY + 5 + zincY, 31, 1 + zincY, 3, 10 - zincY);
-
-            brassY = 9 - cap.getMetalAmounts(AllomancyCapability.BRASS);
-            gig.blit(renderX + 58, renderY + 5 + brassY, 37, 1 + brassY, 3, 10 - brassY);
-
-            copperY = 9 - cap.getMetalAmounts(AllomancyCapability.COPPER);
-            gig.blit(renderX + 76, renderY + 5 + copperY, 43, 1 + copperY, 3, 10 - copperY);
-
-            bronzeY = 9 - cap.getMetalAmounts(AllomancyCapability.BRONZE);
-            gig.blit(renderX + 83, renderY + 5 + bronzeY, 49, 1 + bronzeY, 3, 10 - bronzeY);
-
-            // Draw the gauges second, so that highlights and decorations show over
-            // the bar.
-            gig.blit(renderX, renderY, 0, 0, 5, 20);
-            gig.blit(renderX + 7, renderY, 0, 0, 5, 20);
-
-            gig.blit(renderX + 25, renderY, 0, 0, 5, 20);
-            gig.blit(renderX + 32, renderY, 0, 0, 5, 20);
-
-            gig.blit(renderX + 50, renderY, 0, 0, 5, 20);
-            gig.blit(renderX + 57, renderY, 0, 0, 5, 20);
-
-            gig.blit(renderX + 75, renderY, 0, 0, 5, 20);
-            gig.blit(renderX + 82, renderY, 0, 0, 5, 20);
-
-            if (cap.getMetalBurning(AllomancyCapability.IRON)) {
-                gig.blit(renderX, renderY + 5 + ironY, Frames[currentFrame].x, Frames[currentFrame].y, 5, 3);
-            }
-            if (cap.getMetalBurning(AllomancyCapability.STEEL)) {
-                gig.blit(renderX + 7, renderY + 5 + steelY, Frames[currentFrame].x, Frames[currentFrame].y, 5, 3);
-            }
-            if (cap.getMetalBurning(AllomancyCapability.TIN)) {
-                gig.blit(renderX + 25, renderY + 5 + tinY, Frames[currentFrame].x, Frames[currentFrame].y, 5, 3);
-            }
-            if (cap.getMetalBurning(AllomancyCapability.PEWTER)) {
-                gig.blit(renderX + 32, renderY + 5 + pewterY, Frames[currentFrame].x, Frames[currentFrame].y, 5, 3);
-            }
-            if (cap.getMetalBurning(AllomancyCapability.ZINC)) {
-                gig.blit(renderX + 50, renderY + 5 + zincY, Frames[currentFrame].x, Frames[currentFrame].y, 5, 3);
-            }
-            if (cap.getMetalBurning(AllomancyCapability.BRASS)) {
-                gig.blit(renderX + 57, renderY + 5 + brassY, Frames[currentFrame].x, Frames[currentFrame].y, 5, 3);
-            }
-            if (cap.getMetalBurning(AllomancyCapability.COPPER)) {
-                gig.blit(renderX + 75, renderY + 5 + copperY, Frames[currentFrame].x, Frames[currentFrame].y, 5, 3);
-            }
-            if (cap.getMetalBurning(AllomancyCapability.BRONZE)) {
-                gig.blit(renderX + 82, renderY + 5 + bronzeY, Frames[currentFrame].x, Frames[currentFrame].y, 5, 3);
-            }
+        int num = 0;
+        int row = 0;
+        for (int i = 0; i < Metal.getMetals(); i++) {
+        	if(cap.canBurn(i))
+        	{
+        		if (num > 7) {
+        			num = 0;
+        			row++;
+        		}
+        		int off = 9 - cap.getMetalAmounts(i);
+        		gig.blit(renderX + 1 + (7 * num), renderY + 5 + off + (row * 25), 7 + (6 * num), 1 + off + (row * 25), 3, 10 - off);
+                gig.blit(renderX + (7 * num), renderY + (row * 25), 0, 0, 5, 20);
+                
+                
+                if (cap.getMetalBurning(i)) {
+                    gig.blit(renderX + (7 * num), renderY + 5 + off + (row * 25), Frames[currentFrame].x, Frames[currentFrame].y + (row * 25), 5, 3);
+                }
+                
+                num++;
+        	}
+        	
+        }
 
             if (animationCounter > 6) // Draw the burning symbols...
             {
@@ -460,7 +418,7 @@ public class ClientUtils {
      * @param metal      the index of the metal to toggle
      * @param capability the capability being handled
      */
-    public static void toggleMetalBurn(byte metal, AllomancyCapability capability) {
+    public static void toggleMetalBurn(int metal, AllomancyCapability capability) {
         NetworkHelper.sendToServer(new UpdateBurnPacket(metal, !capability.getMetalBurning(metal)));
 
         if (capability.getMetalAmounts(metal) > 0) {
