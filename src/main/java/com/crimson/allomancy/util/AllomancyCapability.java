@@ -131,7 +131,7 @@ public class AllomancyCapability implements ICapabilitySerializable<CompoundNBT>
     			cap.setMetalBurning(AllomancyCapability.COPPER, true);
         	} else if(entity instanceof MonsterEntity || entity instanceof FoxEntity) {
         		cap.setIsAllomancer(true);
-        		byte metal = (byte) (Math.random() * 8);
+        		int metal = (int) (Math.random() * Metal.getMetals());
         		cap.setMetalAmounts(metal, 5);
     			cap.setCanBurn(metal, true);
     			cap.setBurnStrength(metal, power);
@@ -403,7 +403,7 @@ public class AllomancyCapability implements ICapabilitySerializable<CompoundNBT>
 //        metal_storage.putInt("copper", this.getMetalAmounts(6));
 //        metal_storage.putInt("bronze", this.getMetalAmounts(7));
         
-        for(int i = 0; i < Metal.getMetals(); i ++)
+        for(int i = 0; i < Metal.getMetals(); i++)
         	metal_storage.putInt(Metal.getMetal(i).getName(), this.getMetalAmounts(i));
 
         allomancy_data.put("metal_storage", metal_storage);
@@ -417,7 +417,7 @@ public class AllomancyCapability implements ICapabilitySerializable<CompoundNBT>
 //        metal_burning.putBoolean("brass", this.getMetalBurning(5));
 //        metal_burning.putBoolean("copper", this.getMetalBurning(6));
 //        metal_burning.putBoolean("bronze", this.getMetalBurning(7));
-        for(int i = 0; i < Metal.getMetals(); i ++)
+        for(int i = 0; i < Metal.getMetals(); i++)
         	metal_burning.putBoolean(Metal.getMetal(i).getName(), this.getMetalBurning(i));
         allomancy_data.put("metal_burning", metal_burning);
         
@@ -431,7 +431,7 @@ public class AllomancyCapability implements ICapabilitySerializable<CompoundNBT>
 //        metalFlaring.putBoolean("brass", this.getMetalFlaring(5));
 //        metalFlaring.putBoolean("copper", this.getMetalFlaring(6));
 //        metalFlaring.putBoolean("bronze", this.getMetalFlaring(7));
-        for(int i = 0; i < Metal.getMetals(); i ++)
+        for(int i = 0; i < Metal.getMetals(); i++)
         	metalFlaring.putBoolean(Metal.getMetal(i).getName(), this.getMetalFlaring(i));
         allomancy_data.put("metalFlaring", metalFlaring);
         
@@ -445,7 +445,7 @@ public class AllomancyCapability implements ICapabilitySerializable<CompoundNBT>
 //        faveMetal.putBoolean("brass", this.getFaveMetal(5));
 //        faveMetal.putBoolean("copper", this.getFaveMetal(6));
 //        faveMetal.putBoolean("bronze", this.getFaveMetal(7));
-        for(int i = 0; i < Metal.getMetals(); i ++)
+        for(int i = 0; i < Metal.getMetals(); i++)
         	faveMetal.putBoolean(Metal.getMetal(i).getName(), this.getFaveMetal(i));
         allomancy_data.put("faveMetal", faveMetal);
         
@@ -459,7 +459,7 @@ public class AllomancyCapability implements ICapabilitySerializable<CompoundNBT>
 //        canBurn.putBoolean("brass", this.canBurn(5));
 //        canBurn.putBoolean("copper", this.canBurn(6));
 //        canBurn.putBoolean("bronze", this.canBurn(7));
-        for(int i = 0; i < Metal.getMetals(); i ++)
+        for(int i = 0; i < Metal.getMetals(); i++)
         	canBurn.putBoolean(Metal.getMetal(i).getName(), this.canBurn(i));
         allomancy_data.put("canBurn", canBurn);
         
@@ -473,7 +473,7 @@ public class AllomancyCapability implements ICapabilitySerializable<CompoundNBT>
 //        canStore.putBoolean("brass", this.canStore(5));
 //        canStore.putBoolean("copper", this.canStore(6));
 //        canStore.putBoolean("bronze", this.canStore(7));
-        for(int i = 0; i < Metal.getMetals(); i ++)
+        for(int i = 0; i < Metal.getMetals(); i++)
         	canStore.putBoolean(Metal.getMetal(i).toString(), this.canStore(i));
         allomancy_data.put("canStore", canStore);
         
@@ -486,7 +486,7 @@ public class AllomancyCapability implements ICapabilitySerializable<CompoundNBT>
 //        getSavant.putInt("brass", this.getSavant(5));
 //        getSavant.putInt("copper", this.getSavant(6));
 //        getSavant.putInt("bronze", this.getSavant(7));
-        for(int i = 0; i < Metal.getMetals(); i ++)
+        for(int i = 0; i < Metal.getMetals(); i++)
         	getSavant.putInt(Metal.getMetal(i).toString(), this.getSavant(i));
         allomancy_data.put("getSavant", getSavant);
         
@@ -500,8 +500,8 @@ public class AllomancyCapability implements ICapabilitySerializable<CompoundNBT>
 //        burnStrength.putInt("brass", this.BurnStrength[5]);
 //        burnStrength.putInt("copper", this.BurnStrength[6]);
 //        burnStrength.putInt("bronze", this.BurnStrength[7]);
-        for(int i = 0; i < Metal.getMetals(); i ++)
-        	burnStrength.putInt(Metal.getMetal(i).toString(), this.BurnStrength[i]);
+        for(int i = 0; i < Metal.getMetals(); i++)
+        	burnStrength.putInt(Metal.getMetal(i).getName(), this.BurnStrength[i]);
         allomancy_data.put("burnStrength", burnStrength);
         
         
@@ -526,7 +526,7 @@ public class AllomancyCapability implements ICapabilitySerializable<CompoundNBT>
 //        this.MetalAmounts[5] = metal_storage.getInt("brass");
 //        this.MetalAmounts[6] = metal_storage.getInt("copper");
 //        this.MetalAmounts[7] = metal_storage.getInt("bronze");
-        for(int i = 0; i < Metal.getMetals(); i ++) {
+        for(int i = 0; i < Metal.getMetals(); i++) {
         	if(metal_storage != null)
         		this.MetalAmounts[i]  = metal_storage.getInt(Metal.getMetal(i).getName());
         }
@@ -540,7 +540,7 @@ public class AllomancyCapability implements ICapabilitySerializable<CompoundNBT>
 //        this.MetalBurning[5] = metal_burning.getBoolean("brass");
 //        this.MetalBurning[6] = metal_burning.getBoolean("copper");
 //        this.MetalBurning[7] = metal_burning.getBoolean("bronze");
-        for(int i = 0; i < Metal.getMetals(); i ++) {
+        for(int i = 0; i < Metal.getMetals(); i++) {
         	if(metal_burning != null)
         		this.MetalBurning[i]  = metal_burning.getBoolean(Metal.getMetal(i).getName());
         }
@@ -556,7 +556,7 @@ public class AllomancyCapability implements ICapabilitySerializable<CompoundNBT>
 //	    this.MetalFlaring[5] = metalFlaring.getBoolean("brass");
 //	    this.MetalFlaring[6] = metalFlaring.getBoolean("copper");
 //	    this.MetalFlaring[7] = metalFlaring.getBoolean("bronze");
-	    for(int i = 0; i < Metal.getMetals(); i ++) {
+	    for(int i = 0; i < Metal.getMetals(); i++) {
         	if(metalFlaring != null)
         		this.MetalFlaring[i]  = metalFlaring.getBoolean(Metal.getMetal(i).getName());
         }
@@ -572,7 +572,7 @@ public class AllomancyCapability implements ICapabilitySerializable<CompoundNBT>
 //	        this.FaveMetal[5] = faveMetal.getBoolean("brass");
 //	        this.FaveMetal[6] = faveMetal.getBoolean("copper");
 //	        this.FaveMetal[7] = faveMetal.getBoolean("bronze");
-	        for(int i = 0; i < Metal.getMetals(); i ++) {
+	        for(int i = 0; i < Metal.getMetals(); i++) {
 	        	if(faveMetal != null)
 	        		this.FaveMetal[i]  = faveMetal.getBoolean(Metal.getMetal(i).getName());
 	        }
@@ -587,7 +587,7 @@ public class AllomancyCapability implements ICapabilitySerializable<CompoundNBT>
 //	        this.CanBurn[5] = canBurn.getBoolean("brass");
 //	        this.CanBurn[6] = canBurn.getBoolean("copper");
 //	        this.CanBurn[7] = canBurn.getBoolean("bronze");
-	        for(int i = 0; i < Metal.getMetals(); i ++) {
+	        for(int i = 0; i < Metal.getMetals(); i++) {
 	        	if(canBurn != null)
 	        		this.CanBurn[i]  = canBurn.getBoolean(Metal.getMetal(i).getName());
 	        }
@@ -603,7 +603,7 @@ public class AllomancyCapability implements ICapabilitySerializable<CompoundNBT>
 //	        this.BurnStrength[5] = burnStrength.getInt("brass");
 //	        this.BurnStrength[6] = burnStrength.getInt("copper");
 //	        this.[7] = burnStrength.getInt("bronze");
-	        for(int i = 0; i < Metal.getMetals(); i ++) {
+	        for(int i = 0; i < Metal.getMetals(); i++) {
 	        	if(burnStrength != null)
 	        		this.BurnStrength[i]  = burnStrength.getInt(Metal.getMetal(i).getName());
 	        }
@@ -619,7 +619,7 @@ public class AllomancyCapability implements ICapabilitySerializable<CompoundNBT>
 //		        this.savantism[5] = getSavant.getInt("brass");
 //		        this.savantism[6] = getSavant.getInt("copper");
 //		        this.savantism[7] = getSavant.getInt("bronze");
-		        for(int i = 0; i < Metal.getMetals(); i ++) {
+		        for(int i = 0; i < Metal.getMetals(); i++) {
 		        	if(getSavant != null)
 		        		this.savantism[i]  = getSavant.getInt(Metal.getMetal(i).getName());
 		        }
@@ -635,7 +635,7 @@ public class AllomancyCapability implements ICapabilitySerializable<CompoundNBT>
 //		        this.CanStore[5] = canStore.getBoolean("brass");
 //		        this.CanStore[6] = canStore.getBoolean("copper");
 //		        this.CanStore[7] = canStore.getBoolean("bronze");
-		        for(int i = 0; i < Metal.getMetals(); i ++) {
+		        for(int i = 0; i < Metal.getMetals(); i++) {
 		        	if(canStore != null)
 		        		this.CanStore[i]  = canStore.getBoolean(Metal.getMetal(i).getName());
 		        }

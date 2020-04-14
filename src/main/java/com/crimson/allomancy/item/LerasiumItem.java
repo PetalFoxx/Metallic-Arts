@@ -54,7 +54,10 @@ public class LerasiumItem extends Item {
         for(int i = 0; i < Metal.getMetals(); i++)
         {
         	cap.setCanBurn(i, true);
-        	cap.setBurnStrength(i, cap.getTrueBurnStrength(i) + 5);
+        	if(cap.getTrueBurnStrength(i) > 0)
+        		cap.setBurnStrength(i, cap.getTrueBurnStrength(i) + 8);
+        	else
+        		cap.setBurnStrength(i, 15);
         	//cap.setCanStore(i, true);
         	cap.setMetalAmounts(i, 10);
         }

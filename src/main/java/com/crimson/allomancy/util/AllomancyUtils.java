@@ -35,6 +35,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.fml.network.PacketDistributor;
 
 /**
@@ -265,11 +266,11 @@ public class AllomancyUtils {
      * @param vec             the point being moved toward or away from
      */
     public static void move(double directionScalar, Entity toMove, BlockPos vec, float strength) {
-
         double motionX, motionY, motionZ, magnitude;
         if (toMove.isPassenger()) {
             toMove = toMove.getRidingEntity();
         }
+        
         // Calculate the length of the vector between the entity and anchor
         magnitude = Math.sqrt(Math.pow((toMove.posX - (double) (vec.getX() + .5)), 2)
                 + Math.pow((toMove.posY - (double) (vec.getY() + .5)), 2)

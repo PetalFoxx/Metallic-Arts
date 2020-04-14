@@ -438,6 +438,7 @@ public class ClientEventHandler {
         cap = AllomancyCapability.forPlayer(player);
         
 		if (cap.getMetalBurning(AllomancyCapability.IRON)) {
+			player.sendMessage(new TranslationTextComponent("Enter Loop"));
         	int strength = (int) cap.getCalcBurnStrength(AllomancyCapability.IRON);
         	
         	BlockPos foundPos = null;
@@ -451,6 +452,7 @@ public class ClientEventHandler {
         	Boolean blockClosest = false;
         	
         	if(pos != null) {
+        		player.sendMessage(new TranslationTextComponent("Found Pos"));
             	if(pos.getType() == RayTraceResult.Type.ENTITY )
             	{
             		foundPos = ((EntityRayTraceResult) pos).getEntity().getPosition();
@@ -487,11 +489,11 @@ public class ClientEventHandler {
             //RayTraceResult trace = ClientUtils.getMouseOverExtended(5 + (strength / 2));
 
                 if (tarEnt != null && !blockClosest) {
-                    NetworkHelper.sendToServer(new TryPushPullEntity(tarEnt.getEntityId(), AllomancyUtils.PULL, cap.getCalcBurnStrength(AllomancyCapability.IRON)));
+                	NetworkHelper.sendToServer(new TryPushPullEntity(tarEnt.getEntityId(), AllomancyUtils.PULL, cap.getCalcBurnStrength(AllomancyCapability.IRON)));
                 } else if (tarBlock != null) {
                     //BlockPos bp = ((BlockRayTraceResult) trace).getPos();
                     if (AllomancyUtils.isBlockMetal(this.mc.world.getBlockState(tarBlock).getBlock()) || (player.getHeldItemMainhand().getItem() == Registry.coin_bag && player.isSneaking())) {
-                        NetworkHelper.sendToServer(new TryPushPullBlock(tarBlock, AllomancyUtils.PULL, cap.getCalcBurnStrength(AllomancyCapability.IRON)));
+                    	NetworkHelper.sendToServer(new TryPushPullBlock(tarBlock, AllomancyUtils.PULL, cap.getCalcBurnStrength(AllomancyCapability.IRON)));
                     }
                 }
             
@@ -560,7 +562,7 @@ public class ClientEventHandler {
                 } else if (tarBlock != null) {
                     //BlockPos bp = ((BlockRayTraceResult) trace).getPos();
                     if (AllomancyUtils.isBlockMetal(this.mc.world.getBlockState(tarBlock).getBlock()) || (player.getHeldItemMainhand().getItem() == Registry.coin_bag && player.isSneaking())) {
-                        NetworkHelper.sendToServer(new TryPushPullBlock(tarBlock, AllomancyUtils.PUSH, power));
+                    	NetworkHelper.sendToServer(new TryPushPullBlock(tarBlock, AllomancyUtils.PUSH, power));
                     }
                 }
         }

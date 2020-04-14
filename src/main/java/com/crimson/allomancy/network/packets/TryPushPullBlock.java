@@ -1,12 +1,14 @@
 package com.crimson.allomancy.network.packets;
 
 import com.crimson.allomancy.block.IAllomanticallyActivatedBlock;
+import com.crimson.allomancy.util.AllomancyCapability;
 import com.crimson.allomancy.util.AllomancyUtils;
 import com.crimson.allomancy.util.Registry;
 
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 import java.util.function.Supplier;
@@ -43,6 +45,7 @@ public class TryPushPullBlock {
     public static void handle(final TryPushPullBlock message, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
                     ServerPlayerEntity player = ctx.get().getSender();
+                    
                     BlockPos pos = message.blockPos;
                     // Sanity check to make sure server has same configs and that the block is loaded in the server
                     if ((player.world.isBlockLoaded(pos) && (AllomancyUtils.isBlockMetal(player.world.getBlockState(pos).getBlock()))) // Check Block

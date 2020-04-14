@@ -28,12 +28,12 @@ public class UpdateFlarePacket {
     }
 
     public static void encode(UpdateFlarePacket pkt, PacketBuffer buf) {
-        buf.writeByte(pkt.mat);
+        buf.writeInt(pkt.mat);
         buf.writeBoolean(pkt.value);
     }
 
     public static UpdateFlarePacket decode(PacketBuffer buf) {
-        return new UpdateFlarePacket(buf.readByte(), buf.readBoolean());
+        return new UpdateFlarePacket(buf.readInt(), buf.readBoolean());
     }
 
 
@@ -49,7 +49,7 @@ public class UpdateFlarePacket {
                 cap.setMetalFlaring(message.mat, false);
             }
 
-            NetworkHelper.sendTo(new AllomancyCapabilityPacket(cap, player.getEntityId()), PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> player));
+            //NetworkHelper.sendTo(new AllomancyCapabilityPacket(cap, player.getEntityId()), PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> player));
 
 
         });

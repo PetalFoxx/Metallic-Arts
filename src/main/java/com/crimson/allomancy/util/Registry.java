@@ -231,12 +231,12 @@ public class Registry {
     //        .simpleChannel();
     
     private static final String PROTOCOL_VERSION = "1";
-    public static final SimpleChannel NETWORK = NetworkRegistry.newSimpleChannel(
-        new ResourceLocation(Allomancy.MODID, "networking"),
-        () -> PROTOCOL_VERSION,
-        PROTOCOL_VERSION::equals,
-        PROTOCOL_VERSION::equals
-    );
+    public static final SimpleChannel NETWORK = NetworkRegistry.ChannelBuilder
+            .named(new ResourceLocation(Allomancy.MODID, "main_channel"))
+            .clientAcceptedVersions(PROTOCOL_VERSION::equals)
+            .serverAcceptedVersions(PROTOCOL_VERSION::equals)
+            .networkProtocolVersion(() -> PROTOCOL_VERSION)
+            .simpleChannel();
    
 
     public static ItemGroup allomancy_group = new ItemGroup(Allomancy.MODID) {
@@ -321,7 +321,7 @@ public class Registry {
         NETWORK.registerMessage(index++, UpdateFlarePacket.class, UpdateFlarePacket::encode, UpdateFlarePacket::decode, UpdateFlarePacket::handle);
         NETWORK.registerMessage(index++, ChangeEmotionPacket.class, ChangeEmotionPacket::encode, ChangeEmotionPacket::decode, ChangeEmotionPacket::handle);
         NETWORK.registerMessage(index++, TryPushPullEntity.class, TryPushPullEntity::encode, TryPushPullEntity::decode, TryPushPullEntity::handle);
-        NETWORK.registerMessage(index, TryPushPullBlock.class, TryPushPullBlock::encode, TryPushPullBlock::decode, TryPushPullBlock::handle);
+        NETWORK.registerMessage(index++, TryPushPullBlock.class, TryPushPullBlock::encode, TryPushPullBlock::decode, TryPushPullBlock::handle);
     }
 
 

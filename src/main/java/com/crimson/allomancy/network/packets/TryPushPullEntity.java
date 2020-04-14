@@ -9,6 +9,7 @@ import net.minecraft.entity.passive.IronGolemEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.entity.projectile.ProjectileItemEntity;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 import java.util.function.Supplier;
@@ -48,6 +49,7 @@ public class TryPushPullEntity {
     public static void handle(final TryPushPullEntity message, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
             ServerPlayerEntity player = ctx.get().getSender();
+
             Entity target = player.world.getEntityByID(message.entityIDOther);
             if (target != null) {
                 if (AllomancyUtils.isEntityMetal(target, message.strength)) {

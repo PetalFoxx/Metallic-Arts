@@ -54,7 +54,10 @@ public class LerasiumAlloy extends Item {
         double y = livingEntity.posY + 3;
         double z = livingEntity.posZ;
         cap.setCanBurn(metal, true);
-        cap.setBurnStrength(metal, cap.getTrueBurnStrength(metal) + 5);
+        if(cap.getTrueBurnStrength(metal) > 0)
+    		cap.setBurnStrength(metal, cap.getTrueBurnStrength(metal) + 8);
+    	else
+    		cap.setBurnStrength(metal, cap.getTrueBurnStrength(metal) + 15);
         
         cap.setIsAllomancer(true);
         //Fancy shmancy effects

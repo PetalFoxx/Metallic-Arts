@@ -14,6 +14,7 @@ import com.crimson.allomancy.util.AllomancyCapability;
 import com.crimson.allomancy.util.AllomancyConfig;
 import com.crimson.allomancy.util.AllomancyUtils;
 import com.crimson.allomancy.util.DrainDamage;
+import com.crimson.allomancy.util.Metal;
 import com.crimson.allomancy.util.Registry;
 
 import net.minecraft.entity.Entity;
@@ -83,14 +84,14 @@ public class CommonEventHandler {
                 	int random = (int) (Math.random() * 10);
                 	if(random < 3) 
                 	{
-                		byte randomMisting = (byte) (Math.random() * 8);
+                		int randomMisting = (int) (Math.random() * Metal.getMetals());
                         cap.setCanBurn(randomMisting, true);
                         cap.setIsAllomancer(true);
                 	} else if (random < 7) {
                         cap.setCanStore(assignFerring(), true);
                         cap.setIsAllomancer(true);
                 	} else {
-                		byte randomMisting = (byte) (Math.random() * 8);
+                		int randomMisting = (int) (Math.random() * Metal.getMetals());
                         cap.setCanBurn(randomMisting, true);
                         
                         cap.setCanStore(assignFerring(), true);
@@ -106,11 +107,11 @@ public class CommonEventHandler {
         }
     }
     
-    public byte assignFerring() {
-    	byte power;
-    	power = (byte) (Math.random() * 8);
+    public int assignFerring() {
+    	int power;
+    	power = (int) (Math.random() * Metal.getMetals());
     	while(power == 7 || power == 5) {
-    		power = (byte) (Math.random() * 8);
+    		power = (int) (Math.random() * Metal.getMetals());
     	}
     	return power;
     }
@@ -127,21 +128,21 @@ public class CommonEventHandler {
             
             		
             old.getCapability(AllomancyCapability.PLAYER_CAP).ifPresent(oldCap -> {
-            	for (int i = 0; i < 8; i++) {
+            	for (int i = 0; i < Metal.getMetals(); i++) {
             		if (oldCap.canBurn(i))
             			cap.setCanBurn(i, true);
             	}
             	
-            	for (int i = 0; i < 8; i++) {
+            	for (int i = 0; i < Metal.getMetals(); i++) {
             		if (oldCap.canStore(i))
             			cap.setCanStore(i, true);
             	}
             	
-            	for (int i = 0; i < 8; i++) {
+            	for (int i = 0; i < Metal.getMetals(); i++) {
             		cap.setBurnStrength(i, oldCap.getTrueBurnStrength(i));
             	}
             	
-            	for (int i = 0; i < 8; i++) {
+            	for (int i = 0; i < Metal.getMetals(); i++) {
             		cap.setSavant(i, oldCap.getSavant(i));
             	}
             	
@@ -149,7 +150,7 @@ public class CommonEventHandler {
             
 
                 if (player.world.getGameRules().getBoolean(GameRules.KEEP_INVENTORY) || !event.isWasDeath()) { // if keepInventory is true, or they didn't die, allow them to keep their metals, too
-                    for (int i = 0; i < 8; i++) {
+                    for (int i = 0; i < Metal.getMetals(); i++) {
                         cap.setMetalAmounts(i, oldCap.getMetalAmounts(i));
                     }
                 }
