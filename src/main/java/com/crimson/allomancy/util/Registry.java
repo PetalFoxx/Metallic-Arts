@@ -6,9 +6,11 @@ import com.crimson.allomancy.block.AlloyingSmelter;
 import com.crimson.allomancy.block.IronButtonBlock;
 import com.crimson.allomancy.block.IronLeverBlock;
 import com.crimson.allomancy.block.MetalPurifier;
+import com.crimson.allomancy.effect.MetalEffect;
 import com.crimson.allomancy.entity.GoldNuggetEntity;
 import com.crimson.allomancy.entity.IronNuggetEntity;
 import com.crimson.allomancy.entity.NuggetEntity;
+import com.crimson.allomancy.entity.TimeBubble;
 import com.crimson.allomancy.item.*;
 import com.crimson.allomancy.item.metalmind.BrassMetalMind;
 import com.crimson.allomancy.item.metalmind.BronzeMetalMind;
@@ -38,7 +40,9 @@ import net.minecraft.item.*;
 import net.minecraft.item.crafting.IRecipeSerializer;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.item.crafting.SpecialRecipeSerializer;
+import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectInstance;
+import net.minecraft.potion.EffectType;
 import net.minecraft.potion.Effects;
 import net.minecraft.potion.Potion;
 import net.minecraft.tileentity.TileEntity;
@@ -89,6 +93,26 @@ public class Registry {
     public static Item brass_ingot;
     @ObjectHolder("allomancy:steel_ingot")
     public static Item steel_ingot;
+    
+    @ObjectHolder("allomancy:chromium_ingot")
+    public static Item chromium_ingot;
+    @ObjectHolder("allomancy:nicrosil_ingot")
+    public static Item nicrosil_ingot;
+    @ObjectHolder("allomancy:aluminium_ingot")
+    public static Item aluminium_ingot;
+    @ObjectHolder("allomancy:duralumin_ingot")
+    public static Item duralumin_ingot;
+    @ObjectHolder("allomancy:cadmium_ingot")
+    public static Item cadmium_ingot;
+    @ObjectHolder("allomancy:bendalloy_ingot")
+    public static Item bendalloy_ingot;
+    @ObjectHolder("allomancy:electrum_ingot")
+    public static Item electrum_ingot;
+    
+    @ObjectHolder("allomancy:atium_bead")
+    public static Item atium_bead;
+    
+    
     @ObjectHolder("allomancy:coin_bag")
     public static Item coin_bag;
     @ObjectHolder("allomancy:mistcloak")
@@ -115,6 +139,17 @@ public class Registry {
     public static Block copper_ore;
     @ObjectHolder("allomancy:zinc_ore")
     public static Block zinc_ore;
+    
+    @ObjectHolder("allomancy:chromium_ore")
+    public static Block chromium_ore;
+    @ObjectHolder("allomancy:aluminium_ore")
+    public static Block aluminium_ore;
+    @ObjectHolder("allomancy:cadmium_ore")
+    public static Block cadmium_ore;
+    @ObjectHolder("allomancy:silver_ore")
+    public static Block silver_ore;
+    @ObjectHolder("allomancy:ati_ore")
+    public static Block ati_ore;
     //@ObjectHolder("allomancy:iron_lever")
     //public static IronLeverBlock iron_lever;
     //@ObjectHolder("allomancy:iron_button")
@@ -157,6 +192,9 @@ public class Registry {
     @OnlyIn(Dist.CLIENT)
     public static KeyBinding activeBrass;
     
+    @OnlyIn(Dist.CLIENT)
+    public static KeyBinding activeNicro;
+    
     
     
     
@@ -176,7 +214,10 @@ public class Registry {
     public static final Potion TAP_ZINC = null;
     public static final Potion STORE_BRASS = null;
     public static final Potion TAP_BRASS = null; //MobEffects.HASTE;*/
+    public static Effect EFFECT[] = new Effect[Metal.getMetals()];
     
+    @ObjectHolder("allomancy:time_bubble")
+    public static EntityType<TimeBubble> time_bubble = null;
     
     //@ObjectHolder("allomancy:allomantic_zombie")
     //public static EntityType<AllomanticZombie> allomantic_zombie = null;
@@ -312,6 +353,9 @@ public class Registry {
         
         activeZinc = new KeyBinding("key.activeZinc", GLFW.GLFW_KEY_X, "key.categories.allomancy");
         ClientRegistry.registerKeyBinding(activeZinc);
+        
+        activeNicro = new KeyBinding("key.activeNicro", GLFW.GLFW_KEY_X, "key.categories.allomancy");
+        ClientRegistry.registerKeyBinding(activeNicro);
     }
 
     public static void registerPackets() {
@@ -322,6 +366,7 @@ public class Registry {
         NETWORK.registerMessage(index++, ChangeEmotionPacket.class, ChangeEmotionPacket::encode, ChangeEmotionPacket::decode, ChangeEmotionPacket::handle);
         NETWORK.registerMessage(index++, TryPushPullEntity.class, TryPushPullEntity::encode, TryPushPullEntity::decode, TryPushPullEntity::handle);
         NETWORK.registerMessage(index++, TryPushPullBlock.class, TryPushPullBlock::encode, TryPushPullBlock::decode, TryPushPullBlock::handle);
+        NETWORK.registerMessage(index, NicroBurstPacket.class, NicroBurstPacket::encode, NicroBurstPacket::decode, NicroBurstPacket::handle);
     }
 
 
@@ -333,6 +378,7 @@ public class Registry {
     @SubscribeEvent
     public static void onRegisterItems(final RegistryEvent.Register<Item> event) {
         Item.Properties prop_generic = new Item.Properties().group(allomancy_group).maxStackSize(64);
+        Item.Properties prop_rare = new Item.Properties().group(allomancy_group).maxStackSize(64).rarity(Rarity.RARE);
         event.getRegistry().registerAll(
                 new GrinderItem(),
                 new CoinBagItem(),
@@ -355,7 +401,14 @@ public class Registry {
                 new Item(prop_generic).setRegistryName(new ResourceLocation(Allomancy.MODID, "bronze_ingot")),
                 new Item(prop_generic).setRegistryName(new ResourceLocation(Allomancy.MODID, "brass_ingot")),
                 new Item(prop_generic).setRegistryName(new ResourceLocation(Allomancy.MODID, "pewter_ingot")),
-                new Item(prop_generic).setRegistryName(new ResourceLocation(Allomancy.MODID, "steel_ingot"))
+                new Item(prop_generic).setRegistryName(new ResourceLocation(Allomancy.MODID, "steel_ingot")),
+                new Item(prop_generic).setRegistryName(new ResourceLocation(Allomancy.MODID, "chromium_ingot")),
+                new Item(prop_generic).setRegistryName(new ResourceLocation(Allomancy.MODID, "nicrosil_ingot")),
+                new Item(prop_generic).setRegistryName(new ResourceLocation(Allomancy.MODID, "aluminium_ingot")),
+                new Item(prop_generic).setRegistryName(new ResourceLocation(Allomancy.MODID, "duralumin_ingot")),
+                new Item(prop_generic).setRegistryName(new ResourceLocation(Allomancy.MODID, "cadmium_ingot")),
+                new Item(prop_generic).setRegistryName(new ResourceLocation(Allomancy.MODID, "electrum_ingot")),
+                new Item(prop_rare).setRegistryName(new ResourceLocation(Allomancy.MODID, "ati_bead"))
 
         );
      
@@ -383,6 +436,11 @@ public class Registry {
                 new BlockItem(lead_ore, prop_generic).setRegistryName(lead_ore.getRegistryName()),
                 new BlockItem(copper_ore, prop_generic).setRegistryName(copper_ore.getRegistryName()),
                 new BlockItem(zinc_ore, prop_generic).setRegistryName(zinc_ore.getRegistryName()),
+                new BlockItem(chromium_ore, prop_generic).setRegistryName(chromium_ore.getRegistryName()),
+                new BlockItem(cadmium_ore, prop_generic).setRegistryName(cadmium_ore.getRegistryName()),
+                new BlockItem(silver_ore, prop_generic).setRegistryName(silver_ore.getRegistryName()),
+                new BlockItem(aluminium_ore, prop_generic).setRegistryName(aluminium_ore.getRegistryName()),
+                new BlockItem(ati_ore, prop_rare).setRegistryName(ati_ore.getRegistryName()),
                 new BlockItem(ModBlocks.IRON_LEVER, new Item.Properties().group(ItemGroup.REDSTONE)).setRegistryName(ModBlocks.IRON_LEVER.getRegistryName()),
                 new BlockItem(ModBlocks.IRON_BUTTON, new Item.Properties().group(ItemGroup.REDSTONE)).setRegistryName(ModBlocks.IRON_BUTTON.getRegistryName()),
                 new BlockItem(ModBlocks.METAL_PURIFIER, prop_generic).setRegistryName(ModBlocks.METAL_PURIFIER.getRegistryName()),
@@ -424,11 +482,17 @@ public class Registry {
     @SubscribeEvent
     public static void onRegisterBlocks(final RegistryEvent.Register<Block> event) {
         Block.Properties prop = Block.Properties.create(Material.ROCK).hardnessAndResistance(2.0F).harvestTool(ToolType.PICKAXE).harvestLevel(2);
+        Block.Properties propRare = Block.Properties.create(Material.ROCK).hardnessAndResistance(2.0F).harvestTool(ToolType.PICKAXE).harvestLevel(3);
         event.getRegistry().registerAll(
                 new Block(prop).setRegistryName(new ResourceLocation(Allomancy.MODID, "tin_ore")),
                 new Block(prop).setRegistryName(new ResourceLocation(Allomancy.MODID, "lead_ore")),
                 new Block(prop).setRegistryName(new ResourceLocation(Allomancy.MODID, "copper_ore")),
                 new Block(prop).setRegistryName(new ResourceLocation(Allomancy.MODID, "zinc_ore")),
+                new Block(prop).setRegistryName(new ResourceLocation(Allomancy.MODID, "chromium_ore")),
+                new Block(prop).setRegistryName(new ResourceLocation(Allomancy.MODID, "cadmium_ore")),
+                new Block(prop).setRegistryName(new ResourceLocation(Allomancy.MODID, "silver_ore")),
+                new Block(prop).setRegistryName(new ResourceLocation(Allomancy.MODID, "aluminium_ore")),
+                new Block(propRare).setRegistryName(new ResourceLocation(Allomancy.MODID, "ati_ore")),
                 new IronLeverBlock(),
                 new IronButtonBlock(),
                 new MetalPurifier(),
@@ -488,6 +552,17 @@ public class Registry {
         );
     }*/
     
+    @SubscribeEvent
+    public static void registerEntities(final RegistryEvent.Register<EntityType<?>> event) {
+        event.getRegistry().registerAll(
+        		//new TimeBubble(time_bubble, null).setRegistryName(Allomancy.MODID, "time_bubble")
+        		(EntityType<TimeBubble>) EntityType.Builder
+                .<TimeBubble>create(TimeBubble::new, EntityClassification.AMBIENT)
+                .size(1F, 1F)
+                .build("time_bubble").setRegistryName(Allomancy.MODID, "time_bubble")
+        );
+    }
+    
 
     @SubscribeEvent
     public static void onTileEntityTypeRegistry(final RegistryEvent.Register<TileEntityType<?>> e) {
@@ -510,5 +585,14 @@ public class Registry {
 		entry.setRegistryName(registryName);
 		return entry;
 	}
+    
+    
+    @SubscribeEvent
+    public static void registerEffects(final RegistryEvent.Register<Effect> event) {	
+    	for(int i = 0; i < Metal.getMetals(); i++) {
+    		EFFECT[i] = new MetalEffect(EffectType.NEUTRAL, i, Metal.getMetal(i).getName()).setRegistryName(new ResourceLocation(Allomancy.MODID, "effect_" + Metal.getMetal(i).getName()));
+    		event.getRegistry().register(EFFECT[i]);
+    	}
+    }
 
 }

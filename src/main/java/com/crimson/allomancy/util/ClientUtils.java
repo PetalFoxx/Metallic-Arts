@@ -419,20 +419,31 @@ public class ClientUtils {
      * @param capability the capability being handled
      */
     public static void toggleMetalBurn(int metal, AllomancyCapability capability) {
-        NetworkHelper.sendToServer(new UpdateBurnPacket(metal, !capability.getMetalBurning(metal)));
-
-        if (capability.getMetalAmounts(metal) > 0) {
-            capability.setMetalBurning(metal, !capability.getMetalBurning(metal));
-        }
-        
-        // play a sound effect
-        if (capability.getMetalBurning(metal)) {
-            player.playSound(new SoundEvent(new ResourceLocation("item.flintandsteel.use")), 1,
+    	if(metal == Metal.ALUMINIUM.getNumber())
+    	{
+    		player.playSound(new SoundEvent(new ResourceLocation("item.flintandsteel.use")), 1,
                     5);
-        } else {
-            player.playSound(new SoundEvent(new ResourceLocation("block.fire.extinguish")), 1,
-                    4);
-        }
+    		for(int i = 0; i < Metal.getMetals(); i++)
+    			capability.setMetalAmounts(i, 0);
+    		
+    	}
+    	else
+    	{
+	        NetworkHelper.sendToServer(new UpdateBurnPacket(metal, !capability.getMetalBurning(metal)));
+	
+	        if (capability.getMetalAmounts(metal) > 0) {
+	            capability.setMetalBurning(metal, !capability.getMetalBurning(metal), player);
+	        }
+	        
+	        // play a sound effect
+	        if (capability.getMetalBurning(metal)) {
+	            player.playSound(new SoundEvent(new ResourceLocation("item.flintandsteel.use")), 1,
+	                    5);
+	        } else {
+	            player.playSound(new SoundEvent(new ResourceLocation("block.fire.extinguish")), 1,
+	                    4);
+	        }
+    	}
     }
     
     /**

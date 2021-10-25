@@ -1,6 +1,7 @@
 package com.crimson.allomancy.handlers;
 
 import com.crimson.allomancy.Allomancy;
+import com.crimson.allomancy.entity.TimeBubble;
 import com.crimson.allomancy.item.metalmind.ZincMetalMind;
 import com.crimson.allomancy.item.metalmind.BrassMetalMind;
 import com.crimson.allomancy.item.metalmind.MetalMindItem;
@@ -18,6 +19,7 @@ import com.crimson.allomancy.util.Metal;
 import com.crimson.allomancy.util.Registry;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.boss.WitherEntity;
 import net.minecraft.entity.item.ItemEntity;
@@ -37,6 +39,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootPool;
@@ -49,17 +52,25 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
+import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
+import net.minecraftforge.event.entity.living.LivingExperienceDropEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.living.LivingSpawnEvent;
 import net.minecraftforge.event.entity.player.ArrowLooseEvent;
+import net.minecraftforge.event.entity.player.AttackEntityEvent;
+import net.minecraftforge.event.entity.player.CriticalHitEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerPickupXpEvent;
+import net.minecraftforge.eventbus.api.Event.Result;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 import java.util.List;
 import java.util.Random;
+import java.util.logging.Level;
+
+import org.apache.logging.log4j.Marker;
 
 //@Mod.EventBusSubscriber(modid = Allomancy.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class CommonEventHandler {
@@ -85,15 +96,17 @@ public class CommonEventHandler {
                 	if(random < 3) 
                 	{
                 		int randomMisting = (int) (Math.random() * Metal.getMetals());
-                        cap.setCanBurn(randomMisting, true);
+                		int power = assignMisting();
+                        cap.setCanBurn(power, true);
+                        cap.setBurnStrength(power, 10);
                         cap.setIsAllomancer(true);
                 	} else if (random < 7) {
                         cap.setCanStore(assignFerring(), true);
                         cap.setIsAllomancer(true);
                 	} else {
-                		int randomMisting = (int) (Math.random() * Metal.getMetals());
-                        cap.setCanBurn(randomMisting, true);
-                        
+                		int power = assignMisting();
+                        cap.setCanBurn(power, true);
+                        cap.setBurnStrength(power, 10);
                         cap.setCanStore(assignFerring(), true);
                         
                         cap.setIsAllomancer(true);
@@ -110,11 +123,22 @@ public class CommonEventHandler {
     public int assignFerring() {
     	int power;
     	power = (int) (Math.random() * Metal.getMetals());
-    	while(power == 7 || power == 5) {
+    	while(power == 7 || power == 5 || power == 16 || power == 17) {
     		power = (int) (Math.random() * Metal.getMetals());
     	}
     	return power;
     }
+    
+    public int assignMisting() {
+    	int power;
+    	power = (int) (Math.random() * Metal.getMetals());
+    	while(power == 16 || power == 17) {
+    		power = (int) (Math.random() * Metal.getMetals());
+    	}
+    	return power;
+    }
+    
+    
 
     @SubscribeEvent
     public void onPlayerClone(final net.minecraftforge.event.entity.player.PlayerEvent.Clone event) {
@@ -187,20 +211,48 @@ public class CommonEventHandler {
         }
     }
     
-    
+    @SubscribeEvent
+    public void onCrit(final CriticalHitEvent event) {
+    	if (event.getPlayer() instanceof LivingEntity) {
+        	
+        	LivingEntity source = (LivingEntity) event.getPlayer();
+        	AllomancyCapability cap = AllomancyCapability.forPlayer(source);
+        	
+        	if(cap.getMetalBurning(Metal.ATIUM.getNumber()))
+        	{
+        		event.setResult(Result.ALLOW);
+        	}
+    	}
+    }
     
 
     @SubscribeEvent
     public void onDamage(final LivingHurtEvent event) {
+    	
         // Increase outgoing damage for pewter burners
         if (event.getSource().getTrueSource() instanceof LivingEntity) {
+        	
         	LivingEntity source = (LivingEntity) event.getSource().getTrueSource();
+        	if(source!=null)
+        		AllomancyUtils.LOGGER.info("Attacker: " + source.getEntityString());
         	//if(source != null)
         	//{
 	            AllomancyCapability cap = AllomancyCapability.forPlayer(source);
+	            AllomancyUtils.LOGGER.info("burning pewter: " + cap.getMetalBurning(Metal.PEWTER.getNumber()));
+	            AllomancyUtils.LOGGER.info("burning pewter str: " + cap.getCalcBurnStrength(Metal.PEWTER.getNumber()));
 	
 	            if (cap.getMetalBurning(AllomancyCapability.PEWTER)) {
+	            	AllomancyUtils.LOGGER.info("Increasing Damage");
 	                event.setAmount(event.getAmount() + (2 * (cap.getCalcBurnStrength(AllomancyCapability.PEWTER) / 10) ));
+	            }
+	            
+	            if (cap.getMetalBurning(Metal.CHROMIUM.getNumber())) {
+	            	
+	                AllomancyCapability tarCap = AllomancyCapability.forPlayer(event.getEntityLiving());
+	                for(int i = 0; i < Metal.getMetals(); i++) {
+	                	tarCap.setBurnTime(i, 0);//tarCap.getBurnTime(i) - cap.getCalcBurnStrength(Metal.CHROMIUM.getNumber())*100);
+	                	tarCap.setMetalAmounts(i,tarCap.getMetalAmounts(i) - cap.getCalcBurnStrength(Metal.CHROMIUM.getNumber()) / 10);
+	                }
 	            }
 	            
 	            if(cap.hasMetalmind(AllomancyCapability.BRASS))
@@ -236,6 +288,69 @@ public class CommonEventHandler {
                 cap.setDamageStored(cap.getDamageStored() + (int) (0.5 * (cap.getCalcBurnStrength(AllomancyCapability.PEWTER) / 10) ));
             }
             
+            if(cap.getMetalBurning(Metal.ATIUM.getNumber()))
+        	{
+            	if (event.getSource().getTrueSource() instanceof LivingEntity) {
+                	LivingEntity source = (LivingEntity) event.getSource().getTrueSource();
+                	AllomancyCapability sourceCap = AllomancyCapability.forPlayer(source);
+                	
+                	if(sourceCap.getMetalBurning(Metal.ELECTRUM.getNumber())) {
+                		float ratio = sourceCap.getCalcBurnStrength(Metal.ELECTRUM.getNumber()) / (cap.getCalcBurnStrength(Metal.ATIUM.getNumber() * 2));
+                		event.setAmount(event.getAmount() * ratio);
+                	} else if(sourceCap.getMetalBurning(Metal.ATIUM.getNumber())) {
+                		float ratio = sourceCap.getCalcBurnStrength(Metal.ATIUM.getNumber()) / cap.getCalcBurnStrength(Metal.ATIUM.getNumber());
+                		event.setAmount(event.getAmount() * ratio);
+                	} else {
+                		event.setAmount(0);
+                	}
+                	
+            	} else {
+            		event.setAmount(0);
+            	}
+        	}
+            
+            if(cap.getMetalBurning(Metal.ELECTRUM.getNumber()))
+        	{
+            	float dodge = cap.getCalcBurnStrength(10 + Metal.ELECTRUM.getNumber() * 2);
+            	Random rand = new Random();
+            	rand.nextInt(100);
+            	if (event.getSource().getTrueSource() instanceof LivingEntity) {
+                	LivingEntity source = (LivingEntity) event.getSource().getTrueSource();
+                	AllomancyCapability sourceCap = AllomancyCapability.forPlayer(source);
+                	
+                	if(sourceCap.getMetalBurning(Metal.ELECTRUM.getNumber())) {
+                		float ratio = sourceCap.getCalcBurnStrength(Metal.ELECTRUM.getNumber()) / (cap.getCalcBurnStrength(Metal.ELECTRUM.getNumber()));
+                		dodge = dodge * ratio;
+                		if(rand.nextInt(100) < (int) dodge)
+                			event.setAmount(0);
+                	} else if(sourceCap.getMetalBurning(Metal.ATIUM.getNumber())) {
+                		float ratio = (sourceCap.getCalcBurnStrength(Metal.ATIUM.getNumber()) * 2) / cap.getCalcBurnStrength(Metal.ELECTRUM.getNumber());
+                		dodge = dodge * ratio;
+                		if(rand.nextInt(100) < (int) dodge)
+                			event.setAmount(0);
+                	} else {
+                		if(rand.nextInt(100) < (int) dodge)
+                			event.setAmount(0);
+                	}
+                	
+            	} else {
+            		if(rand.nextInt(100) < (int) dodge)
+            			event.setAmount(0);
+            	}
+        	}
+            
+            if (cap.getMetalBurning(Metal.CHROMIUM.getNumber())) {
+                if(event.getSource().getTrueSource() instanceof LivingEntity) {
+	                AllomancyCapability tarCap = AllomancyCapability.forPlayer((LivingEntity) event.getSource().getTrueSource());
+	                
+	                if(tarCap != null) {
+		                for(int i = 0; i < Metal.getMetals(); i++) {
+		                	tarCap.setBurnTime(i, tarCap.getBurnTime(i) - cap.getCalcBurnStrength(Metal.CHROMIUM.getNumber()) * 50);
+		                }
+	                }
+                }
+            }
+            
             if(cap.hasMetalmind(AllomancyCapability.BRASS))
         	{
         		BrassMetalMind metalmind = (BrassMetalMind) cap.getMetalmind(AllomancyCapability.BRASS).getItem();
@@ -265,7 +380,7 @@ public class CommonEventHandler {
 	        	witherCap.setMetalAmounts(AllomancyCapability.PEWTER, 5);
 	        	witherCap.setCanBurn(AllomancyCapability.PEWTER, true);
 	        	witherCap.setBurnStrength(AllomancyCapability.PEWTER, 20);
-	        	witherCap.setMetalBurning(AllomancyCapability.PEWTER, true);
+	        	witherCap.setMetalBurning(AllomancyCapability.PEWTER, true, wither);
 	        	
 	        	NetworkHelper.sync(wither);
 	        	
@@ -291,7 +406,7 @@ public class CommonEventHandler {
     		Entity firer = arrow.getShooter();
         	
         	if(firer instanceof LivingEntity) {
-        		AllomancyCapability cap = AllomancyCapability.forPlayer(firer);
+        		AllomancyCapability cap = AllomancyCapability.forPlayer((LivingEntity) firer);
         		if(cap.hasMetalmind(AllomancyCapability.TIN)) {
         			
         			TinMetalMind metalmind = (TinMetalMind) cap.getMetalmind(AllomancyCapability.TIN).getItem();
@@ -332,7 +447,40 @@ public class CommonEventHandler {
     	if (event.getEntity() instanceof ThrowableEntity) {
     		
     	}
-
+    }
+    
+    
+    @SubscribeEvent
+    public void onDropXP(LivingExperienceDropEvent event) {
+    	int xp = event.getDroppedExperience();
+    	
+    	AllomancyUtils.LOGGER.info("drop xp");
+    	PlayerEntity player = event.getAttackingPlayer();
+    	AllomancyCapability cap = AllomancyCapability.forPlayer(player);
+    	if(cap.hasMetalmind(AllomancyCapability.ZINC))
+    	{
+    		AllomancyUtils.LOGGER.info("feru xp");
+    		ZincMetalMind metalmind = (ZincMetalMind) cap.getMetalmind(AllomancyCapability.ZINC).getItem();
+    		if(metalmind.getAction() == METALMIND_ACTION.TAPPING && MetalMindItem.canLose(cap.getMetalmind(AllomancyCapability.ZINC))){
+    			xp = (int) (xp * (1.2 + (0.2 * MetalMindItem.getStrength(cap.getMetalmind(AllomancyCapability.ZINC)))));
+    			MetalMindItem.setUsed(true, cap.getMetalmind(AllomancyCapability.ZINC));
+    		}
+    		if(metalmind.getAction() == METALMIND_ACTION.FILLING && MetalMindItem.canGain(cap.getMetalmind(AllomancyCapability.ZINC))) {
+    			xp = (int) (xp * (0.8 - (0.2 * MetalMindItem.getStrength(cap.getMetalmind(AllomancyCapability.ZINC)))));
+    			MetalMindItem.setUsed(true, cap.getMetalmind(AllomancyCapability.ZINC));
+    		}
+    	}
+    	
+    	if(cap.getMetalBurning(Metal.GOLD.getNumber())) {
+    		AllomancyUtils.LOGGER.info("allo xp");
+    		Random rand = new Random();
+    		if(rand.nextInt(10) == 0) {
+	    		player.sendMessage(new TranslationTextComponent("You glimpse a life you could have lead, a different turn in the path."));
+	    		xp = (int) (xp * cap.getCalcBurnStrength(Metal.GOLD.getNumber()));
+    		}
+    	}
+    	
+    	
     }
 
 
@@ -350,45 +498,121 @@ public class CommonEventHandler {
     }
 
 
+//    @SubscribeEvent
+//    public void onWorldTick(final TickEvent.WorldTickEvent event) {
+//        if (event.phase == TickEvent.Phase.END) {
+//
+//            World world = (World) event.world;
+//            List<? extends PlayerEntity> list = world.getPlayers();
+//            
+//            
+//            for (PlayerEntity curPlayer : list) {
+//                
+//                List<LivingEntity> nearby;
+//                
+//                int xLoc = (int) curPlayer.posX, yLoc = (int) curPlayer.posY, zLoc = (int) curPlayer.posZ;
+//                BlockPos negative = new BlockPos(xLoc - 20, yLoc - 20, zLoc - 20);
+//                BlockPos positive = new BlockPos(xLoc + 20, yLoc + 20, zLoc + 20);
+//                nearby = curPlayer.world.getEntitiesWithinAABB(LivingEntity.class, new AxisAlignedBB(negative, positive), entity -> entity != null);
+//                
+//                for(LivingEntity entity : nearby)
+//                {
+//                	if(AllomancyCapability.forPlayer(entity) != null)
+//                		runAllomancy(entity);
+//                }
+//                //runAllomancy(curPlayer);
+//            }
+//        }
+//    }
+    
     @SubscribeEvent
-    public void onWorldTick(final TickEvent.WorldTickEvent event) {
-        if (event.phase == TickEvent.Phase.END) {
+    public static void onExperiencePickup(PlayerPickupXpEvent event) {
+    	AllomancyUtils.LOGGER.info("Picked up xp");
+    	PlayerEntity player = event.getPlayer();
+    	AllomancyCapability cap = AllomancyCapability.forPlayer(player);
+    	if(cap.hasMetalmind(AllomancyCapability.ZINC))
+    	{
+    		AllomancyUtils.LOGGER.info("feru xp");
+    		ZincMetalMind metalmind = (ZincMetalMind) cap.getMetalmind(AllomancyCapability.ZINC).getItem();
+    		if(metalmind.getAction() == METALMIND_ACTION.TAPPING && MetalMindItem.canLose(cap.getMetalmind(AllomancyCapability.ZINC))){
+    			event.getOrb().xpValue = (int) (event.getOrb().xpValue * (1.2 + (0.2 * MetalMindItem.getStrength(cap.getMetalmind(AllomancyCapability.ZINC)))));
+    			MetalMindItem.setUsed(true, cap.getMetalmind(AllomancyCapability.ZINC));
+    		}
+    		if(metalmind.getAction() == METALMIND_ACTION.FILLING && MetalMindItem.canGain(cap.getMetalmind(AllomancyCapability.ZINC))) {
+    			event.getOrb().xpValue = (int) (event.getOrb().xpValue * (0.8 - (0.2 * MetalMindItem.getStrength(cap.getMetalmind(AllomancyCapability.ZINC)))));
+    			MetalMindItem.setUsed(true, cap.getMetalmind(AllomancyCapability.ZINC));
+    		}
+    	}
+    	
+    	if(cap.getMetalBurning(Metal.GOLD.getNumber())) {
+    		AllomancyUtils.LOGGER.info("allo xp");
+    		Random rand = new Random();
+    		if(true) {//rand.nextInt(10) == 0) {
+	    		player.sendMessage(new TranslationTextComponent("You glimpse a life you could have lead, a different turn in the path."));
+	    		event.getOrb().xpValue = (int) (event.getOrb().xpValue * cap.getCalcBurnStrength(Metal.GOLD.getNumber()));
+    		}
+    	}
+    }
+    
 
-            World world = (World) event.world;
-            List<? extends PlayerEntity> list = world.getPlayers();
-            
-            
-            for (PlayerEntity curPlayer : list) {
-                
-                List<LivingEntity> nearby;
-                
-                int xLoc = (int) curPlayer.posX, yLoc = (int) curPlayer.posY, zLoc = (int) curPlayer.posZ;
-                BlockPos negative = new BlockPos(xLoc - 20, yLoc - 20, zLoc - 20);
-                BlockPos positive = new BlockPos(xLoc + 20, yLoc + 20, zLoc + 20);
-                nearby = curPlayer.world.getEntitiesWithinAABB(LivingEntity.class, new AxisAlignedBB(negative, positive), entity -> entity != null);
-                
-                for(LivingEntity entity : nearby)
-                {
-                	if(AllomancyCapability.forPlayer(entity) != null)
-                		runAllomancy(entity);
-                }
-                runAllomancy(curPlayer);
-            }
+    
+	@SubscribeEvent
+	public void livingTick(LivingUpdateEvent event)
+	{
+		LivingEntity entity = event.getEntityLiving();
+		if(!entity.world.isRemote)
+			if(AllomancyCapability.forPlayer(entity) != null && AllomancyCapability.forPlayer(entity).isAllomancer())
+			{
+				runAllomancy(entity);
+				if(AllomancyCapability.forPlayer(entity).getMetalBurning(Metal.ATIUM.getNumber())) {
+					runAtium(entity);
+				}
+			}
+		
+		
+	}
+    
+    public void runAtium(LivingEntity entity) {
+    	
+    	
+    	BlockPos negative = new BlockPos(entity.posX - 10, entity.posY - 5/*max*/, entity.posZ - 10);
+        BlockPos positive = new BlockPos(entity.posX + 10, entity.posY + 5/*max*/, entity.posZ + 10);
+        // Add metal entities to metal list
+        List<LivingEntity> entities = entity.world.getEntitiesWithinAABB(LivingEntity.class, new AxisAlignedBB(negative, positive));
+        
+        for(LivingEntity living : entities) {
+        	AllomancyCapability livCap = AllomancyCapability.forPlayer(living);
+        	AllomancyCapability cap = AllomancyCapability.forPlayer(entity);
+        	if(!(livCap.getMetalBurning(Metal.ATIUM.getNumber()) || livCap.getMetalBurning(Metal.ELECTRUM.getNumber()))) {
+        		living.addPotionEffect(new EffectInstance(Effects.HASTE, 5, -1 * (cap.getCalcBurnStrength(Metal.ATIUM.getNumber()) / 5), false, false, false));
+        		living.addPotionEffect(new EffectInstance(Effects.SPEED, 5, -1 * (cap.getCalcBurnStrength(Metal.ATIUM.getNumber()) / 5), false, false, false));
+        	}
         }
     }
     
+    
+    
+    
+    
     public void runAllomancy(LivingEntity allomancer) {
     	World world = (World) allomancer.world;
-    	if(!world.isRemote()) {
+    	//if(!world.isRemote()) {
 	    	try {
+	    		
 		    	if(AllomancyCapability.forPlayer(allomancer).isInCoppercloud() > 0)
 		    		AllomancyCapability.forPlayer(allomancer).setIsInCoppercloud(0);
 		    	
 		    	AllomancyCapability cap = AllomancyCapability.forPlayer(allomancer);
 		    	if (cap.isAllomancer()) {
 		            // Run the necessary updates on the player's metals
-		            if (allomancer instanceof ServerPlayerEntity) {
-		                AllomancyUtils.updateMetalBurnTime(cap, (ServerPlayerEntity) allomancer);
+		            if (allomancer instanceof LivingEntity) {
+		                AllomancyUtils.updateMetalBurnTime(cap, (LivingEntity) allomancer);
+		            }
+		            if(cap.getNicro() > 0) {
+		            	cap.setNicro(cap.getNicro() - 1);
+		            	if(cap.getNicro() == 0) {
+		            		cap.setNicroStr(0);
+		            	}
 		            }
 		            // Damage the player if they have stored damage and pewter cuts out
 		            if (!cap.getMetalBurning(AllomancyCapability.PEWTER) && (cap.getDamageStored() > 0)) {
@@ -404,9 +628,9 @@ public class CommonEventHandler {
 		            if (cap.getMetalBurning(AllomancyCapability.PEWTER)) {
 		                //Add jump boost and speed to pewter burners
 		            	int strength = (int) cap.getCalcBurnStrength(AllomancyCapability.PEWTER) / 10;
-		            	allomancer.addPotionEffect(new EffectInstance(Effects.JUMP_BOOST, 30, strength, true, false));
-		            	allomancer.addPotionEffect(new EffectInstance(Effects.SPEED, 30, strength - 1, true, false));
-		            	allomancer.addPotionEffect(new EffectInstance(Effects.HASTE, 30, strength - 1, true, false));
+		            	allomancer.addPotionEffect(new EffectInstance(Effects.JUMP_BOOST, 30, strength, true, false, true));
+		            	//allomancer.addPotionEffect(new EffectInstance(Effects.SPEED, 30, strength - 1, true, false, false));
+		            	//allomancer.addPotionEffect(new EffectInstance(Effects.HASTE, 30, strength - 1, true, false, false));
 		
 		                if (cap.getDamageStored() > 0) {
 		                    if (world.rand.nextInt(200) == 0) {
@@ -414,6 +638,11 @@ public class CommonEventHandler {
 		                    }
 		                }
 		
+		            }
+		            if (cap.getMetalBurning(Metal.ATIUM.getNumber())) {
+		            	int strength = (int) cap.getCalcBurnStrength(Metal.ATIUM.getNumber()) / 10;
+		            	allomancer.addPotionEffect(new EffectInstance(Effects.SPEED, 30, strength - 1, true, false));
+		            	allomancer.addPotionEffect(new EffectInstance(Effects.HASTE, 30, strength - 1, true, false));
 		            }
 		            if (cap.getMetalBurning(AllomancyCapability.TIN)) {
 		            	int strength = (int) cap.getCalcBurnStrength(AllomancyCapability.TIN) / 10;
@@ -434,12 +663,18 @@ public class CommonEventHandler {
 		            	allomancer.removePotionEffect(Effects.NIGHT_VISION);
 		            }
 		            
+		            if(cap.getMetalBurning(Metal.BENDALLOY.getNumber())) {
+		            	if(cap.bubble != null) {
+		            		cap.bubble = new TimeBubble(EntityType.AREA_EFFECT_CLOUD, world, true, allomancer);
+		            	}
+		            		
+		            }
 		            
 		            
 		             
 		        }
 	    	} finally {}
-    	}
+    	//}
     	
     }
 }

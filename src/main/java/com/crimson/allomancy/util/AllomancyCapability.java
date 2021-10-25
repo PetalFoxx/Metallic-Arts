@@ -1,6 +1,7 @@
 package com.crimson.allomancy.util;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.monster.CreeperEntity;
 import net.minecraft.entity.monster.MonsterEntity;
@@ -10,6 +11,8 @@ import net.minecraft.entity.passive.FoxEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
+import net.minecraft.potion.Effect;
+import net.minecraft.potion.EffectInstance;
 import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
@@ -29,6 +32,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.crimson.allomancy.Allomancy;
+import com.crimson.allomancy.effect.MetalEffect;
+import com.crimson.allomancy.entity.TimeBubble;
 import com.crimson.allomancy.item.metalmind.MetalMindItem;
 import com.crimson.allomancy.item.metalmind.MetalMindItem.METALMIND_ACTION;
 import com.crimson.allomancy.network.NetworkHelper;
@@ -45,41 +50,44 @@ public class AllomancyCapability implements ICapabilitySerializable<CompoundNBT>
     //todo seriously rethink this cap
     public static final int[] MAX_BURN_TIME = {3600, 3600, 7200, 2400, 3600, 3600, 4800, 3200, 
 			3200, 3200, 3200, 3200, 3200, 3200, 3200, 3200,
-			3200};
+			3200, 3200};
     public static final int IRON = 0, STEEL = 1, TIN = 2, PEWTER = 3, ZINC = 4, BRASS = 5, COPPER = 6, BRONZE = 7, CADMIUM = 8;
 
     private boolean isAllomancer = false;
     private int damageStored = 0;
     private int[] BurnTime = {3600, 3600, 7200, 2400, 3600, 3600, 4800, 3200, 
     					3200, 3200, 3200, 3200, 3200, 3200, 3200, 3200,
-    					3200};
+    					1200, 1200};
     private int[] MetalAmounts = {0, 0, 0, 0, 0, 0, 0, 0, 0,
     		0, 0, 0, 0, 0, 0, 0, 0,
-    		0};
-    private int[] BurnStrength = {10, 10, 10, 10, 10, 10, 10, 10, 10,
-    		10, 10, 10, 10, 10, 10, 10, 10,
-    		10};
+    		0, 0};
+    private int[] BurnStrength = {0, 0, 0, 0, 0, 0, 0, 0, 0,
+    		0, 0, 0, 0, 0, 0, 0, 0,
+    		0, 0};
     private int[] savantism = {0, 0, 0, 0, 0, 0, 0, 0, 0,
     		 0, 0, 0, 0, 0, 0, 0, 0,
-    		 0};
+    		 0, 0};
     private boolean[] CanBurn = {false, false, false, false, false, false, false, false, false,
     		false, false, false, false, false, false, false, false,
-    		false};
+    		false, false};
     private boolean[] CanStore = {false, false, false, false, false, false, false, false, false,
     		false, false, false, false, false, false, false, false, false,
-    		false};
+    		false, false};
     private boolean[] MetalBurning = {false, false, false, false, false, false, false, false, false,
     		false, false, false, false, false, false, false, false, false,
-    		false};
+    		false, false};
     private boolean[] MetalFlaring = {false, false, false, false, false, false, false, false, false,
     		false, false, false, false, false, false, false, false, false,
-    		false};
+    		false, false};
     private boolean[] FaveMetal = {false, false, false, false, false, false, false, false, false,
     		false, false, false, false, false, false, false, false, false,
-    		false};
+    		false, false};
+    private int NicroBurst = 0;
+    private int NicroBurstStr = 0;
     private ItemStack[] activeMetalMinds = new ItemStack[Metal.getMetals()];
     private float coppercloudStrength = 0;
     private List<BlockPos> marks = new ArrayList<BlockPos>();
+    public TimeBubble bubble;
     public boolean tested = false;
     
 
@@ -89,8 +97,12 @@ public class AllomancyCapability implements ICapabilitySerializable<CompoundNBT>
      * @param player the player you want data for
      * @return the AllomancyCapabilites data of the player
      */
-    public static AllomancyCapability forPlayer(Entity player) {
+    public static AllomancyCapability forPlayer(LivingEntity player) {
         //return player.getCapability(PLAYER_CAP).orElseThrow(() -> new RuntimeException("Capability not attached!"));
+    	assert(PLAYER_CAP != null);
+    	assert(player != null);
+    	
+    	
     	AllomancyCapability cap = player.getCapability(PLAYER_CAP).orElse(new AllomancyCapability());
     	if(!cap.getTested())
     		snap(player, cap);
@@ -98,7 +110,7 @@ public class AllomancyCapability implements ICapabilitySerializable<CompoundNBT>
         
     }
     
-    private static void snap(Entity entity, AllomancyCapability cap)
+    private static void snap(LivingEntity entity, AllomancyCapability cap)
     {
     	Random rand = new Random();
     	if(rand.nextFloat() < 0.2f) {
@@ -112,30 +124,29 @@ public class AllomancyCapability implements ICapabilitySerializable<CompoundNBT>
 	    		cap.setIsAllomancer(true);
 	    		cap.setMetalAmounts(AllomancyCapability.PEWTER, 5);
 	    		cap.setCanBurn(AllomancyCapability.PEWTER, true);
-	    		cap.setBurnStrength(AllomancyCapability.PEWTER, power);
-	    		cap.setMetalBurning(AllomancyCapability.PEWTER, true);
-	    	}
-    		else if(entity instanceof SkeletonEntity) {
-            	
+	    		cap.setBurnStrength(AllomancyCapability.PEWTER, 50);
+	    		cap.setMetalBurning(AllomancyCapability.PEWTER, true, entity);
+	    	} else if(entity instanceof SkeletonEntity) {
     			cap.setIsAllomancer(true);
     			cap.setMetalAmounts(AllomancyCapability.STEEL, 5);
     			cap.setCanBurn(AllomancyCapability.STEEL, true);
     			cap.setBurnStrength(AllomancyCapability.STEEL, power);
-    			cap.setMetalBurning(AllomancyCapability.STEEL, true);
-        	}
-    		else if(entity instanceof CreeperEntity) {
-    			cap.setIsAllomancer(true);
-    			cap.setMetalAmounts(AllomancyCapability.COPPER, 5);
-    			cap.setCanBurn(AllomancyCapability.COPPER, true);
-    			cap.setBurnStrength(AllomancyCapability.COPPER, power);
-    			cap.setMetalBurning(AllomancyCapability.COPPER, true);
+    			cap.setMetalBurning(AllomancyCapability.STEEL, true, entity);
+        	} else if(entity instanceof CreeperEntity) {
+        		if(rand.nextFloat() < 0.4f) {
+	    			cap.setIsAllomancer(true);
+	    			cap.setMetalAmounts(AllomancyCapability.COPPER, 5);
+	    			cap.setCanBurn(AllomancyCapability.COPPER, true);
+	    			cap.setBurnStrength(AllomancyCapability.COPPER, power);
+	    			cap.setMetalBurning(AllomancyCapability.COPPER, true, entity);
+        		}
         	} else if(entity instanceof MonsterEntity || entity instanceof FoxEntity) {
         		cap.setIsAllomancer(true);
         		int metal = (int) (Math.random() * Metal.getMetals());
         		cap.setMetalAmounts(metal, 5);
     			cap.setCanBurn(metal, true);
     			cap.setBurnStrength(metal, power);
-    			cap.setMetalBurning(metal, true);
+    			cap.setMetalBurning(metal, true, entity);
         	}
     		
     		
@@ -163,6 +174,24 @@ public class AllomancyCapability implements ICapabilitySerializable<CompoundNBT>
     
     public void setTested() {
         tested = true;
+    }
+    
+    public int getNicro() {
+        return NicroBurst;
+    }
+    
+    
+    public void setNicro(int nb) {
+    	NicroBurst = nb;
+    }
+    
+    public int getNicroStr() {
+        return NicroBurstStr;
+    }
+    
+    
+    public void setNicroStr(int nb) {
+    	NicroBurstStr = nb;
     }
     
     /**
@@ -224,9 +253,14 @@ public class AllomancyCapability implements ICapabilitySerializable<CompoundNBT>
      * @param metal        the index of the metal to set
      * @param metalBurning the value to set
      */
-    public void setMetalBurning(int metal, boolean metalBurning) {
-    	if(canBurn(metal))
+    public void setMetalBurning(int metal, boolean metalBurning, LivingEntity entity) {
+    	if(canBurn(metal)) {
     		MetalBurning[metal] = metalBurning;
+    		if(metalBurning)
+    			entity.addPotionEffect(new EffectInstance(Registry.EFFECT[metal], 10000, getCalcBurnStrength(metal)/10));
+    		else
+    			entity.removeActivePotionEffect(Registry.EFFECT[metal]);
+    	}
     }
 
     /**
@@ -347,6 +381,14 @@ public class AllomancyCapability implements ICapabilitySerializable<CompoundNBT>
     	
         if(isSavant(metal)) {
         	strength = strength + (5 * (getSavant(metal)/10000));
+        }
+        
+        if(metal != Metal.DURALUMIN.getNumber() && MetalBurning[Metal.DURALUMIN.getNumber()]) {
+        	strength = strength * ((getCalcBurnStrength(Metal.DURALUMIN.getNumber()) / 5) * 100);
+        }
+        
+        if(NicroBurst > 0) {
+        	strength = strength * ((NicroBurstStr / 5) * 100);
         }
         
     	return strength;

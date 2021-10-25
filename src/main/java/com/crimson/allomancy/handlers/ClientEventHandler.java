@@ -8,6 +8,7 @@ import com.crimson.allomancy.item.metalmind.ZincMetalMind;
 import com.crimson.allomancy.item.metalmind.MetalMindItem.METALMIND_ACTION;
 import com.crimson.allomancy.network.NetworkHelper;
 import com.crimson.allomancy.network.packets.ChangeEmotionPacket;
+import com.crimson.allomancy.network.packets.NicroBurstPacket;
 import com.crimson.allomancy.network.packets.TryPushPullBlock;
 import com.crimson.allomancy.network.packets.TryPushPullEntity;
 import com.crimson.allomancy.util.*;
@@ -21,6 +22,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.boss.WitherEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
@@ -49,6 +51,7 @@ import net.minecraftforge.fml.common.Mod;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -61,7 +64,7 @@ public class ClientEventHandler {
 
     private Set<Entity> metal_entities = new HashSet<>();
     private Set<BlockPos> metal_blocks = new HashSet<>();
-    private Set<Entity> nearby_allomancers = new HashSet<>();
+    private Set<LivingEntity> nearby_allomancers = new HashSet<>();
     private boolean activateMarks = false;
 
    
@@ -117,7 +120,7 @@ public class ClientEventHandler {
                 	power = 40;
                 }
                 
-                int max = 5 + (power / 2);
+                int max = 5 + (power / 4);
                 BlockPos negative = new BlockPos(xLoc - max, yLoc - 10/*max*/, zLoc - max);
                 BlockPos positive = new BlockPos(xLoc + max, yLoc + 10/*max*/, zLoc + max);
                 final float finPower = power;
@@ -260,7 +263,8 @@ public class ClientEventHandler {
                 
                 
                 // Populate our list of nearby allomancy users
-                nearby_allomancers.clear();
+                
+            	nearby_allomancers.clear();
                 
              // Add metal burners to a list
 
@@ -276,11 +280,26 @@ public class ClientEventHandler {
                     for(LivingEntity entity : nearby) {
                     	try {
                     		AllomancyCapability capOther = AllomancyCapability.forPlayer(entity);
-	                    	if((!(capOther.isInCoppercloud() > 0) || (cap.getCalcBurnStrength(AllomancyCapability.BRONZE) > 40 && cap.getCalcBurnStrength(AllomancyCapability.BRONZE) > capOther.isInCoppercloud())) && !entity.equals(player)) {
-	                    		if (entity instanceof CreeperEntity || entity instanceof SkeletonEntity || entity instanceof WitherSkeletonEntity || entity instanceof WitherEntity || capOther.isBurningMetal()) {
-	                    			nearby_allomancers.add(entity);
-	                    		}
-	                    	}
+                    		if(capOther.isBurningMetal() && !entity.equals(player))
+		                    	//if(!(capOther.isInCoppercloud() > 0) || (cap.getCalcBurnStrength(AllomancyCapability.BRONZE) > 40 && cap.getCalcBurnStrength(AllomancyCapability.BRONZE) > capOther.isInCoppercloud())) {
+		                    		nearby_allomancers.add(entity);
+		                    	//}
+	                    	
+                    	} finally {}
+                    	
+                    }
+                    
+                    
+                    
+                    
+                    List<ServerPlayerEntity> players = player.world.getEntitiesWithinAABB(ServerPlayerEntity.class, new AxisAlignedBB(negative, positive), entity -> entity != null);
+                    for(ServerPlayerEntity entity : players) {
+                    	try {
+                    		AllomancyCapability capOther = AllomancyCapability.forPlayer(entity);
+                    		if(capOther.isBurningMetal() && !entity.equals(player))
+		                    	//if(!(capOther.isInCoppercloud() > 0) || (cap.getCalcBurnStrength(AllomancyCapability.BRONZE) > 40 && cap.getCalcBurnStrength(AllomancyCapability.BRONZE) > capOther.isInCoppercloud())) {
+		                    		nearby_allomancers.add(entity);
+		                    	//}
 	                    	
                     	} finally {}
                     	
@@ -308,12 +327,14 @@ public class ClientEventHandler {
     	
     	if(Registry.activeSteel.isPressed()) {
     		activeSteel();
-   		
     	}
     	
     	if(Registry.activeBrass.isPressed()) {
     		activeBrass();
-
+    	}
+    	
+    	if(Registry.activeNicro.isPressed()) {
+    		activeNicro();
     	}
     	
     	
@@ -363,7 +384,7 @@ public class ClientEventHandler {
                 }
                 cap = AllomancyCapability.forPlayer(player);
 
-                	for(byte i = 0; i < 8; i++)
+                	for(int i = 0; i < Metal.getMetals(); i++)
                 	{
                 		if(cap.getMetalBurning(i))
                 			ClientUtils.toggleMetalFlare(i, cap);
@@ -438,7 +459,6 @@ public class ClientEventHandler {
         cap = AllomancyCapability.forPlayer(player);
         
 		if (cap.getMetalBurning(AllomancyCapability.IRON)) {
-			player.sendMessage(new TranslationTextComponent("Enter Loop"));
         	int strength = (int) cap.getCalcBurnStrength(AllomancyCapability.IRON);
         	
         	BlockPos foundPos = null;
@@ -452,7 +472,6 @@ public class ClientEventHandler {
         	Boolean blockClosest = false;
         	
         	if(pos != null) {
-        		player.sendMessage(new TranslationTextComponent("Found Pos"));
             	if(pos.getType() == RayTraceResult.Type.ENTITY )
             	{
             		foundPos = ((EntityRayTraceResult) pos).getEntity().getPosition();
@@ -593,24 +612,12 @@ public class ClientEventHandler {
 	                {	
 	                	if(!AllomancyCapability.forPlayer(player).getMetalBurning(AllomancyCapability.COPPER))
 	                	{
-		                	if (entity instanceof CreatureEntity) 
-		                		NetworkHelper.sendToServer(new ChangeEmotionPacket(entityb.getEntityId(), ChangeEmotionPacket.emotion.AGGRO, cap.getCalcBurnStrength(AllomancyCapability.ZINC)));
-		                	else if (entity instanceof PlayerEntity) {
-		                		((LivingEntity) entity).addPotionEffect(new EffectInstance(Effects.STRENGTH, 600, 1, false, false, false));
-	                        	((LivingEntity) entity).addPotionEffect(new EffectInstance(Effects.RESISTANCE, 600, -2, false, false, false));
-		                	}
-	                	}
+	                		NetworkHelper.sendToServer(new ChangeEmotionPacket(entityb.getEntityId(), ChangeEmotionPacket.emotion.AGGRO, cap.getCalcBurnStrength(AllomancyCapability.ZINC)));
+		                }
 	                }
-                } else if (entity instanceof CreatureEntity) {
-                	if(!AllomancyCapability.forPlayer(player).getMetalBurning(AllomancyCapability.COPPER))
+                } else if(!AllomancyCapability.forPlayer(player).getMetalBurning(AllomancyCapability.COPPER))
                 		NetworkHelper.sendToServer(new ChangeEmotionPacket(entity.getEntityId(), ChangeEmotionPacket.emotion.AGGRO, cap.getCalcBurnStrength(AllomancyCapability.ZINC)));
-                } else if (entity instanceof PlayerEntity) {
-                	if(!AllomancyCapability.forPlayer(player).getMetalBurning(AllomancyCapability.COPPER))
-                	{
-	            		((LivingEntity) entity).addPotionEffect(new EffectInstance(Effects.STRENGTH, 600, 0, false, false, false));
-	                	((LivingEntity) entity).addPotionEffect(new EffectInstance(Effects.RESISTANCE, 600, -1, false, false, false));
-                	}
-            	}
+                
             }
         }
     }
@@ -640,23 +647,53 @@ public class ClientEventHandler {
 	                {	
 	                	if(!AllomancyCapability.forPlayer(player).getMetalBurning(AllomancyCapability.COPPER))
 	                	{
-		                	if (entity instanceof CreatureEntity) 
-		                		NetworkHelper.sendToServer(new ChangeEmotionPacket(entityb.getEntityId(), ChangeEmotionPacket.emotion.CALM, cap.getCalcBurnStrength(AllomancyCapability.BRASS)));
-		                	else if (entity instanceof PlayerEntity) {
-		                		((LivingEntity) entity).addPotionEffect(new EffectInstance(Effects.WEAKNESS, 600, 1, false, false, false));
-	                        	((LivingEntity) entity).addPotionEffect(new EffectInstance(Effects.RESISTANCE, 600, 1, false, false, false));
-		                	}
-	                	}
+		                	NetworkHelper.sendToServer(new ChangeEmotionPacket(entityb.getEntityId(), ChangeEmotionPacket.emotion.CALM, cap.getCalcBurnStrength(AllomancyCapability.BRASS)));
+	                	} 		
+	                }
+                } else if(!AllomancyCapability.forPlayer(player).getMetalBurning(AllomancyCapability.COPPER)) 
+                		NetworkHelper.sendToServer(new ChangeEmotionPacket(entity.getEntityId(), ChangeEmotionPacket.emotion.CALM, cap.getCalcBurnStrength(AllomancyCapability.BRASS)));
+                
+                
+            }
+        }
+    }
+    
+    public void activeNicro()
+    {
+    	PlayerEntity player = mc.player;
+        AllomancyCapability cap;
+        cap = AllomancyCapability.forPlayer(player);
+        player.sendMessage(new TranslationTextComponent("Success!"));
+        if (cap.getMetalBurning(Metal.NICROSIL.getNumber())) {
+        	int strength = (int) cap.getCalcBurnStrength(Metal.NICROSIL.getNumber());
+            RayTraceResult trace = ClientUtils.getMouseOverExtended(5 + (strength / 2));
+            Entity entity;
+            if ((trace != null) && (trace.getType() == RayTraceResult.Type.ENTITY)) {
+                entity = ((EntityRayTraceResult) trace).getEntity();
+                if(strength > 40)
+                {
+                	int xLoc = (int) entity.posX, yLoc = (int) entity.posY, zLoc = (int) entity.posZ;
+	                BlockPos negative = new BlockPos(xLoc - (strength /2), yLoc - (strength /2), zLoc - (strength /2));
+	                BlockPos positive = new BlockPos(xLoc + (strength /2), yLoc + (strength /2), zLoc + (strength /2));
+	                
+	                List<LivingEntity> nearby;
+	                nearby = player.world.getEntitiesWithinAABB(LivingEntity.class, new AxisAlignedBB(negative, positive), entityb -> entityb != null);
+	                
+	                for(LivingEntity entityb : nearby)
+	                {
+		                	if (entity instanceof LivingEntity && !entityb.equals(player)) 
+		                		NetworkHelper.sendToServer(new NicroBurstPacket(entityb.getEntityId(), cap.getCalcBurnStrength(Metal.NICROSIL.getNumber()), player.getEntityId()));
 	                		
 	                }
-                } else if (entity instanceof CreatureEntity) {
-                	if(!AllomancyCapability.forPlayer(player).getMetalBurning(AllomancyCapability.COPPER))
-                		NetworkHelper.sendToServer(new ChangeEmotionPacket(entity.getEntityId(), ChangeEmotionPacket.emotion.CALM, cap.getCalcBurnStrength(AllomancyCapability.BRASS)));
-                } else if (entity instanceof PlayerEntity) {
-                	if(!AllomancyCapability.forPlayer(player).getMetalBurning(AllomancyCapability.COPPER)) {
-	                	((LivingEntity) entity).addPotionEffect(new EffectInstance(Effects.WEAKNESS, 600, 0, false, false, false));
-	                	((LivingEntity) entity).addPotionEffect(new EffectInstance(Effects.RESISTANCE, 600, 0, false, false, false));
-                	}
+                } else if (entity instanceof LivingEntity) {
+                	LivingEntity lEntity = (LivingEntity) entity;
+                	AllomancyCapability mobCap = AllomancyCapability.forPlayer(lEntity);
+
+                	
+                	NetworkHelper.sendToServer(new NicroBurstPacket(lEntity.getEntityId(), cap.getCalcBurnStrength(Metal.NICROSIL.getNumber()), player.getEntityId()));
+                	if(!lEntity.world.isRemote)
+                		NetworkHelper.sync(lEntity);
+                	
                 }
             }
         }
@@ -718,7 +755,7 @@ public class ClientEventHandler {
         }
 
         if ((cap.getMetalBurning(AllomancyCapability.BRONZE) && !cap.getMetalBurning(AllomancyCapability.COPPER))) {
-            for (Entity entity : nearby_allomancers) {
+            for (LivingEntity entity : nearby_allomancers) {
             	if(cap.getCalcBurnStrength(AllomancyCapability.BRONZE) < 15)
             		ClientUtils.drawMetalLine(playerX, playerY, playerZ, entity.posX, entity.posY - 0.5, entity.posZ, 3.0F, 0.7F, 0.15F, 0.15F);
             	else
@@ -740,11 +777,6 @@ public class ClientEventHandler {
             			ClientUtils.drawMetalLine(playerX, playerY, playerZ, entity.posX, entity.posY - 0.5, entity.posZ, entityCap.getCalcBurnStrength(AllomancyCapability.ZINC)/4, 0.0F, 0.5F, 0.5F);
             		if(entityCap.getMetalBurning(AllomancyCapability.BRASS))
             			ClientUtils.drawMetalLine(playerX, playerY, playerZ, entity.posX, entity.posY - 0.5, entity.posZ, entityCap.getCalcBurnStrength(AllomancyCapability.BRASS)/4, 0.25F, 0.5F, 0.5F);
-
-            				
-            		if (entity instanceof CreeperEntity || entity instanceof SkeletonEntity || entity instanceof WitherSkeletonEntity)
-            			ClientUtils.drawMetalLine(playerX, playerY, playerZ, entity.posX, entity.posY - 0.5, entity.posZ, 2.0f, 1.0F, 1.0F, 1.0F);
-            			
             		
             	}
             }
@@ -787,24 +819,4 @@ public class ClientEventHandler {
             
         }
     }
-    
-    @OnlyIn(Dist.CLIENT)
-    @SubscribeEvent
-    public static void onExperiencePickup(PlayerPickupXpEvent event) {
-    	PlayerEntity player = event.getPlayer();
-    	AllomancyCapability cap = AllomancyCapability.forPlayer(player);
-    	if(cap.hasMetalmind(AllomancyCapability.ZINC))
-    	{
-    		ZincMetalMind metalmind = (ZincMetalMind) cap.getMetalmind(AllomancyCapability.ZINC).getItem();
-    		if(metalmind.getAction() == METALMIND_ACTION.TAPPING && MetalMindItem.canLose(cap.getMetalmind(AllomancyCapability.ZINC))){
-    			event.getOrb().xpValue = (int) (event.getOrb().xpValue * (1.2 + (0.2 * MetalMindItem.getStrength(cap.getMetalmind(AllomancyCapability.ZINC)))));
-    			MetalMindItem.setUsed(true, cap.getMetalmind(AllomancyCapability.ZINC));
-    		}
-    		if(metalmind.getAction() == METALMIND_ACTION.FILLING && MetalMindItem.canGain(cap.getMetalmind(AllomancyCapability.ZINC))) {
-    			event.getOrb().xpValue = (int) (event.getOrb().xpValue * (0.8 - (0.2 * MetalMindItem.getStrength(cap.getMetalmind(AllomancyCapability.ZINC)))));
-    			MetalMindItem.setUsed(true, cap.getMetalmind(AllomancyCapability.ZINC));
-    		}
-    	}
-    }
-
 }

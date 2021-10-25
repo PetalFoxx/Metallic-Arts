@@ -5,6 +5,7 @@ import com.crimson.allomancy.util.AllomancyCapability;
 import com.crimson.allomancy.util.Registry;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraftforge.common.util.FakePlayer;
@@ -28,7 +29,7 @@ public class NetworkHelper {
         Registry.NETWORK.send(target, msg);
     }
 
-    public static void sync(Entity playerIn) {
+    public static void sync(LivingEntity playerIn) {
     	AllomancyCapability cap = AllomancyCapability.forPlayer(playerIn);
     	if(AllomancyCapability.forPlayer(playerIn) != null)
     		sendTo(new AllomancyCapabilityPacket(cap, playerIn.getEntityId()), PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> playerIn));

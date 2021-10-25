@@ -45,9 +45,9 @@ public class UpdateBurnPacket {
             AllomancyCapability cap = AllomancyCapability.forPlayer(player);
 
             if (cap.getMetalAmounts(message.mat) > 0) {
-                cap.setMetalBurning(message.mat, message.value);
+                cap.setMetalBurning(message.mat, message.value, player);
             } else {
-                cap.setMetalBurning(message.mat, false);
+                cap.setMetalBurning(message.mat, false, player);
             }
             
             //NetworkHelper.sendTo(new AllomancyCapabilityPacket(cap, player.getEntityId()), PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> player));

@@ -55,6 +55,17 @@ public class OreGenerator {
                 Registry.lead_ore, AllomancyConfig.generate_lead));
         ores.add(new OreData(AllomancyConfig.zinc_max_y, AllomancyConfig.zinc_min_y, 9, AllomancyConfig.zinc_density,
                 Registry.zinc_ore, AllomancyConfig.generate_zinc));
+        
+        ores.add(new OreData(24, 13, 2, 4,
+                Registry.chromium_ore, true));
+        ores.add(new OreData(48, 22, 3, 4,
+                Registry.aluminium_ore, true));
+        ores.add(new OreData(24, 13, 2, 4,
+                Registry.cadmium_ore, true));
+        ores.add(new OreData(36, 23, 4, 4,
+                Registry.silver_ore, AllomancyConfig.generate_zinc));
+        ores.add(new OreData(12, 2, 1, 1,
+                Registry.ati_ore, true));
     }
 
 

@@ -2,6 +2,7 @@ package com.crimson.allomancy.network.packets;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
@@ -43,7 +44,7 @@ public class AllomancyCapabilityPacket {
 
     public static void handle(final AllomancyCapabilityPacket message, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
-            Entity player = (Entity) Minecraft.getInstance().world.getEntityByID(message.entityID);
+            LivingEntity player = (LivingEntity) Minecraft.getInstance().world.getEntityByID(message.entityID);
             if (player != null) {
                 AllomancyCapability playerCap = AllomancyCapability.forPlayer(player);
                 playerCap.deserializeNBT(message.nbt);

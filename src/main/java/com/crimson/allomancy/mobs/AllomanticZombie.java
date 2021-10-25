@@ -28,7 +28,7 @@ public class AllomanticZombie extends ZombieEntity {
 			AllomancyCapability.forPlayer(this).setBurnStrength(AllomancyCapability.PEWTER, 15);
 			AllomancyCapability.forPlayer(this).setMetalAmounts(AllomancyCapability.PEWTER, 10);
 			
-			AllomancyCapability.forPlayer(this).setMetalBurning(AllomancyCapability.PEWTER, true);
+	//		AllomancyCapability.forPlayer(this).setMetalBurning(AllomancyCapability.PEWTER, true);
 	   }
 	
 	
@@ -40,7 +40,7 @@ public class AllomanticZombie extends ZombieEntity {
 		AllomancyCapability.forPlayer(this).setBurnStrength(AllomancyCapability.PEWTER, 15);
 		AllomancyCapability.forPlayer(this).setMetalAmounts(AllomancyCapability.PEWTER, 10);
 		
-		AllomancyCapability.forPlayer(this).setMetalBurning(AllomancyCapability.PEWTER, true);
+	//	AllomancyCapability.forPlayer(this).setMetalBurning(AllomancyCapability.PEWTER, true);
 	}
 	
 	@Override

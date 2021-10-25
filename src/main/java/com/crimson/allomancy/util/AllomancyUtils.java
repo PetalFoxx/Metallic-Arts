@@ -1,5 +1,11 @@
 package com.crimson.allomancy.util;
 
+
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import com.crimson.allomancy.Allomancy;
 import com.crimson.allomancy.entity.GoldNuggetEntity;
 import com.crimson.allomancy.entity.IronNuggetEntity;
 import com.crimson.allomancy.entity.NuggetEntity;
@@ -47,6 +53,8 @@ public class AllomancyUtils {
 
     public static final byte PUSH = 1;
     public static final byte PULL = -1;
+    
+    public static final Logger LOGGER = LogManager.getLogger(Allomancy.MODID);
 
 
     /**
@@ -305,15 +313,20 @@ public class AllomancyUtils {
      * @param player     the player being checked
      */
     public static void updateMetalBurnTime(AllomancyCapability capability, LivingEntity player) {
-        for (int i = 0; i < 8; i++) {
+        for (int i = 0; i < Metal.getMetals(); i++) {
             if (capability.getMetalBurning(i)) {
                 if (!capability.canBurn(i)) {
                     // put out any metals that the player shouldn't be able to burn
-                    capability.setMetalBurning(i, false);
+                    capability.setMetalBurning(i, false, player);
                     if(player instanceof ServerPlayerEntity)
                     	NetworkHelper.sendTo(new AllomancyCapabilityPacket(capability, player.getEntityId()), (ServerPlayerEntity) player);
                 } else {
-                    if(capability.getMetalFlaring(i))
+                	if((capability.getMetalBurning(Metal.DURALUMIN.getNumber()) && i != Metal.DURALUMIN.getNumber()) || capability.getNicro() > 0) {
+                		capability.setBurnTime(i, capability.getBurnTime(i) - 500);
+                    	if(Math.random() == 0.0)
+                    		capability.setSavant(i, capability.getSavant(i) + 500);
+                	}
+                	else if(capability.getMetalFlaring(i))
                     {
                     	capability.setBurnTime(i, capability.getBurnTime(i) - 2);
                     	if(Math.random() == 0.0)
@@ -324,13 +337,13 @@ public class AllomancyUtils {
                     	if(Math.random() == 0.0)
                     		capability.setSavant(i, capability.getSavant(i) + 1);
                     }
-                    if (capability.getBurnTime(i) == 0) {
+                    if (capability.getBurnTime(i) <= 0) {
                         capability.setBurnTime(i, capability.MAX_BURN_TIME[i]);
                         capability.setMetalAmounts(i, capability.getMetalAmounts(i) - 1);
                         if(player instanceof ServerPlayerEntity)
                         	NetworkHelper.sendTo(new AllomancyCapabilityPacket(capability, player.getEntityId()), (ServerPlayerEntity) player);
-                        if (capability.getMetalAmounts(i) == 0) {
-                            capability.setMetalBurning(i, false);
+                        if (capability.getMetalAmounts(i) <= 0) {
+                            capability.setMetalBurning(i, false, player);
                             NetworkHelper.sendTo(new AllomancyCapabilityPacket(capability, player.getEntityId()), PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> player));
                         }
                     }
@@ -342,6 +355,7 @@ public class AllomancyUtils {
             		NetworkHelper.sendTo(new AllomancyCapabilityPacket(capability, player.getEntityId()), (ServerPlayerEntity) player);
             }
         }
+        
     }
 
 

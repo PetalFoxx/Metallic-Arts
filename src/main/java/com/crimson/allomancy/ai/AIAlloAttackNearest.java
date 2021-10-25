@@ -16,8 +16,8 @@ public class AIAlloAttackNearest extends NearestAttackableTargetGoal {
 		super(p_i50313_1_, p_i50313_2_, p_i50313_3_);
 		cap = AllomancyCapability.forPlayer(p_i50313_1_);
 		
-		if(cap.canBurn(AllomancyCapability.TIN))
-			cap.setMetalBurning(AllomancyCapability.TIN, true);
+		//if(cap.canBurn(AllomancyCapability.TIN))
+			//cap.setMetalBurning(AllomancyCapability.TIN, true);
 		// TODO Auto-generated constructor stub
 	}
 
@@ -38,7 +38,7 @@ public class AIAlloAttackNearest extends NearestAttackableTargetGoal {
 	@Override
 	public void startExecuting() {
 		if(cap.canBurn(AllomancyCapability.PEWTER))
-			cap.setMetalBurning(AllomancyCapability.PEWTER, true);
+			//cap.setMetalBurning(AllomancyCapability.PEWTER, true);
 	   this.goalOwner.setAttackTarget(this.nearestTarget);
 	   super.startExecuting();
 	}

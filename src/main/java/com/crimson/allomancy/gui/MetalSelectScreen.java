@@ -43,7 +43,8 @@ public class MetalSelectScreen extends Screen {
             new ResourceLocation(String.format(GUI_METAL, 8)), new ResourceLocation(String.format(GUI_METAL, 9)),
             new ResourceLocation(String.format(GUI_METAL, 10)), new ResourceLocation(String.format(GUI_METAL, 11)),
             new ResourceLocation(String.format(GUI_METAL, 12)), new ResourceLocation(String.format(GUI_METAL, 13)),
-            new ResourceLocation(String.format(GUI_METAL, 14)), new ResourceLocation(String.format(GUI_METAL, 15)),};
+            new ResourceLocation(String.format(GUI_METAL, 14)), new ResourceLocation(String.format(GUI_METAL, 15)),
+            new ResourceLocation(String.format(GUI_METAL, 16)), new ResourceLocation(String.format(GUI_METAL, 17)),};
 
     int timeIn = AllomancyConfig.animate_selection ? 0 : 10; // Config setting for whether the wheel animates open or instantly appears
     int slotSelected = -1;
@@ -240,7 +241,7 @@ public class MetalSelectScreen extends Screen {
         if (slotSelected != -1) {
             int slot = slots.get(slotSelected);
             slot = (slot + 4) % Metal.getMetals(); // Make the slot the one I actually want
-            ClientUtils.toggleMetalBurn((byte) slot, cap);
+            ClientUtils.toggleMetalBurn(slot, cap);
             mc.player.playSound(SoundEvents.UI_BUTTON_CLICK, 0.1F,
                     2.0F);
         }

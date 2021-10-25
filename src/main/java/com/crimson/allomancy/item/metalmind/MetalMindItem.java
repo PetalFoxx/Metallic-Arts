@@ -50,6 +50,7 @@ public abstract class MetalMindItem extends Item {
 	protected METALMIND_ACTION action;
 	protected Boolean active = false;
 	protected Boolean used = false;
+	protected Boolean unsealed = false;
 	
 	public void changeAction(String action, World world, ItemStack item) {
 		item.getTag().putString("action", action);
@@ -116,10 +117,17 @@ public abstract class MetalMindItem extends Item {
         		strength = new TranslationTextComponent("Strength: " + (int) stack.getTag().getInt("strength"));
         	strength.setStyle(strength.getStyle().setColor(TextFormatting.GRAY));
         	ITextComponent own = new TranslationTextComponent("Owner: " + worldIn.getPlayerByUuid(stack.getTag().getUniqueId("owner")).getName().getUnformattedComponentText());
+        	
         	invest.setStyle(invest.getStyle().setColor(TextFormatting.GRAY));
             tooltip.add(own);
             tooltip.add(strength);
             tooltip.add(invest);
+            
+            if(stack.getTag().getString("unsealed") == "true") {
+	            ITextComponent unsealed = new TranslationTextComponent("Unsealed");
+	            unsealed.setStyle(invest.getStyle().setColor(TextFormatting.DARK_PURPLE));
+	            tooltip.add(unsealed);
+            }
         }
     }
 	
@@ -143,7 +151,7 @@ public abstract class MetalMindItem extends Item {
 					cap.addActiveMetalMind(player.getHeldItem(hand), metal);
 					world.getPlayerByUuid(item.getTag().getUniqueId("owner")).sendMessage(new TranslationTextComponent("Owner Set"));
 				} else {
-					if(world.getPlayerByUuid(item.getTag().getUniqueId("owner")).equals(player)) {
+					if(world.getPlayerByUuid(item.getTag().getUniqueId("owner")).equals(player) || item.getTag().getString("unsealed") == "true") {
 						if(cap.getMetalmind(metal) == null || !cap.getMetalmind(metal).equals(item))
 							cap.addActiveMetalMind(player.getHeldItem(hand), metal);
 						
